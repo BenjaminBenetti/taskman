@@ -1,0 +1,10 @@
+
+# Build 
+/dist
+/node_modules
+/.env
+
+# AI
+/.claude/settings.local.json
+/game-plan.md
+/plan
