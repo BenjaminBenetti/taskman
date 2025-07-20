@@ -25,6 +25,10 @@ services:
       - "8000:8000"
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://taskman:taskman_dev@postgres:5432/taskman_db
-    volumes:
-      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    develop:
+      watch:
+        - path: ./backend
+          action: sync
+          target: /app

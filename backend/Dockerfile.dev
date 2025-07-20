@@ -1,4 +1,6 @@
-FROM denoland/deno:2.4.2
+FROM denoland/deno:bin-2.4.2 AS deno
+FROM node:24-bookworm
+COPY --from=deno /deno /usr/local/bin/deno
 
 WORKDIR /app
 

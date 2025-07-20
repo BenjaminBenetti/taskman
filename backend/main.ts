@@ -1,6 +1,11 @@
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import { appRouter } from "./src/trpc/router.ts";
+import { prisma } from "./src/prisma/index.ts";
 
+// Connect to DB
+await prisma.$connect();
+
+// setup the TRPC server
 const server = createHTTPServer({
   router: appRouter,
 });
