@@ -14,13 +14,13 @@ The TaskMan backend runs as a REST webserver. This is what the clients connect t
 
 - Storing all persistent data, tasks, task metadata and ai chat history, some user metadata (most user info in identity provider, like Google, Apple, etc).
 - Running asynchronous ai tasks.
-- Providing a REST API for clients to interact with the system.
+- Providing a TRPC API for clients to interact with the system.
 
 #### Technologies:
 - Deno 2.4.2 
 - PostgreSQL 16.x 
 - Prisma ORM 
-- Deno HTTP & Oak web framework
+- Deno HTTP & TRPC
 
 ## TaskMan Cli
 The TaskMan CLI is a command line interface that allows users to interact with the TaskMan backend.

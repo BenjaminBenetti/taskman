@@ -1,3 +1,7 @@
 {
-  "workspace": ["./backend", "./cli"]
+  "workspace": ["./backend", "./cli"],
+  "tasks": {
+    "cli": "cd cli && deno task start",
+    "cli:dev": "cd cli && deno task dev"
+  }
 }

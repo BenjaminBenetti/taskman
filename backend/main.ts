@@ -1,11 +1,10 @@
-import { Application } from "@oak";
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+import { appRouter } from "./src/trpc/router.ts";
 
-const app = new Application();
-
-app.use((ctx) => {
-  ctx.response.body = { message: "Hello World" };
+const server = createHTTPServer({
+  router: appRouter,
 });
 
 const port = 8000;
-console.log(`Server running on http://localhost:${port}`);
-await app.listen({ port });
+server.listen(port);
+console.log(`TRPC server running on http://localhost:${port}`);

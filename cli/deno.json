@@ -2,10 +2,14 @@
   "name": "@taskman/cli",
   "version": "0.1.0",
   "tasks": {
-    "dev": "deno run --watch main.ts",
-    "start": "deno run main.ts"
+    "dev": "deno run --allow-net --watch main.ts",
+    "start": "deno run --allow-net main.ts"
   },
   "exports": {
     ".": "./main.ts"
+  },
+  "imports": {
+    "@trpc/client": "npm:@trpc/client@^11.4.3",
+    "@taskman/backend": "../backend/mod.ts"
   }
 }
