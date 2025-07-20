@@ -1,8 +1,15 @@
 
-# Build 
-/dist
-/node_modules
-/.env
+# Deno
+.env
+.env.local
+
+# Node modules (if any npm packages are used)
+node_modules/
+
+# Build output
+dist/
+build/
+
 
 # AI
 /.claude/settings.local.json

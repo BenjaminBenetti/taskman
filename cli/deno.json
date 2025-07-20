@@ -1,0 +1,11 @@
+{
+  "name": "@taskman/cli",
+  "version": "0.1.0",
+  "tasks": {
+    "dev": "deno run --watch main.ts",
+    "start": "deno run main.ts"
+  },
+  "exports": {
+    ".": "./main.ts"
+  }
+}
