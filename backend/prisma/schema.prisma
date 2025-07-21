@@ -15,7 +15,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model HelloWorld {
-  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name String
-}
+// Example model 
+// model HelloWorld {
+//   id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   name String
+// }
