@@ -8,6 +8,9 @@
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [5000, 5001, 5432],
 	// "portsAttributes": {
@@ -27,7 +30,7 @@
 		}
 	},
 	// Use 'postStartCommand' to run commands each time the container starts.
-	"postStartCommand": "bash /workspaces/taskman/.devcontainer/post-start.sh"
+	"postCreateCommand": "./.devcontainer/post-create.sh"
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
