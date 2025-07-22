@@ -5,6 +5,7 @@
     "npm:@trpc/client@^11.4.3": "11.4.3_@trpc+server@11.4.3__typescript@5.8.3_typescript@5.8.3",
     "npm:@trpc/server@11.4.3": "11.4.3_typescript@5.8.3",
     "npm:@types/node@*": "22.15.15",
+    "npm:prisma@*": "6.12.0",
     "npm:prisma@^6.12.0": "6.12.0",
     "npm:prisma@latest": "6.12.0",
     "npm:zod@4.0.5": "4.0.5"

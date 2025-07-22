@@ -15,8 +15,126 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example model 
-// model HelloWorld {
-//   id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-//   name String
-// }
+model User {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Columns
+  email              String  @unique
+  name               String?
+  identityProvider   String // "google", "apple", etc
+  identityProviderId String // external provider user ID
+
+  // Foreign Keys
+  assigneeId String @unique @db.Uuid // self-assignee relationship
+
+  // Standard Columns 
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
+  // Relations
+  createdTasks Task[]     @relation("TaskCreator")
+  assignees    Assignee[] @relation("AssigneeCreator")
+  selfAssignee Assignee   @relation("UserSelfAssignee", fields: [assigneeId], references: [id])
+
+  @@map("users")
+}
+
+model Assignee {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Columns
+  name     String
+  email    String?
+  phone    String?
+  notes    String?
+  isActive Boolean @default(true)
+
+  // Foreign Keys
+  creatorId String @db.Uuid
+
+  // Standard Columns
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
+  // Relations
+  creator      User          @relation("AssigneeCreator", fields: [creatorId], references: [id])
+  linkedUser   User?         @relation("UserSelfAssignee")
+  tasks        Task[]        @relation("TaskAssignee")
+  chatMessages ChatMessage[]
+
+  @@map("assignees")
+}
+
+model Task {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Columns
+  title                 String
+  description           String?
+  status                TaskStatus @default(PENDING)
+  priority              Priority   @default(MEDIUM)
+  remindAt              DateTime?  @db.Timestamptz()
+  remindIntervalMinutes Int? // use to generate the next remindAt. i.e. daily reminders.
+
+  // Foreign Keys
+  creatorId  String  @db.Uuid
+  assigneeId String? @db.Uuid
+
+  // Standard Columns
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
+  // Relations
+  creator      User          @relation("TaskCreator", fields: [creatorId], references: [id])
+  assignee     Assignee?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  chatMessages ChatMessage[]
+
+  @@map("tasks")
+}
+
+model ChatMessage {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Columns
+  content String
+  role    MessageRole // "user", "assistant", "system"
+
+  // Foreign Keys
+  taskId     String? @db.Uuid
+  assigneeId String  @db.Uuid
+
+  // Standard Columns
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
+  // Relations
+  task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  assignee Assignee @relation(fields: [assigneeId], references: [id])
+
+  @@map("chat_messages")
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
