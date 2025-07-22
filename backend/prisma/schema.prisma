@@ -15,6 +15,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Tenant {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Columns
+  name        String
+  description String?
+
+  // Standard Columns
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  updatedAt DateTime  @updatedAt @db.Timestamptz()
+  deletedAt DateTime? @db.Timestamptz()
+
+  // Relations
+  users        User[]
+  assignees    Assignee[]
+  tasks        Task[]
+  chatMessages ChatMessage[]
+
+  @@map("tenants")
+}
+
 model User {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
@@ -25,6 +46,7 @@ model User {
   identityProviderId String // external provider user ID
 
   // Foreign Keys
+  tenantId   String @db.Uuid
   assigneeId String @unique @db.Uuid // self-assignee relationship
 
   // Standard Columns 
@@ -33,6 +55,7 @@ model User {
   deletedAt DateTime? @db.Timestamptz()
 
   // Relations
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
   createdTasks Task[]     @relation("TaskCreator")
   assignees    Assignee[] @relation("AssigneeCreator")
   selfAssignee Assignee   @relation("UserSelfAssignee", fields: [assigneeId], references: [id])
@@ -51,6 +74,7 @@ model Assignee {
   isActive Boolean @default(true)
 
   // Foreign Keys
+  tenantId  String @db.Uuid
   creatorId String @db.Uuid
 
   // Standard Columns
@@ -59,6 +83,7 @@ model Assignee {
   deletedAt DateTime? @db.Timestamptz()
 
   // Relations
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
   creator      User          @relation("AssigneeCreator", fields: [creatorId], references: [id])
   linkedUser   User?         @relation("UserSelfAssignee")
   tasks        Task[]        @relation("TaskAssignee")
@@ -79,6 +104,7 @@ model Task {
   remindIntervalMinutes Int? // use to generate the next remindAt. i.e. daily reminders.
 
   // Foreign Keys
+  tenantId   String  @db.Uuid
   creatorId  String  @db.Uuid
   assigneeId String? @db.Uuid
 
@@ -88,6 +114,7 @@ model Task {
   deletedAt DateTime? @db.Timestamptz()
 
   // Relations
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
   creator      User          @relation("TaskCreator", fields: [creatorId], references: [id])
   assignee     Assignee?     @relation("TaskAssignee", fields: [assigneeId], references: [id])
   chatMessages ChatMessage[]
@@ -103,6 +130,7 @@ model ChatMessage {
   role    MessageRole // "user", "assistant", "system"
 
   // Foreign Keys
+  tenantId   String  @db.Uuid
   taskId     String? @db.Uuid
   assigneeId String  @db.Uuid
 
@@ -112,6 +140,7 @@ model ChatMessage {
   deletedAt DateTime? @db.Timestamptz()
 
   // Relations
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
   task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   assignee Assignee @relation(fields: [assigneeId], references: [id])
 
