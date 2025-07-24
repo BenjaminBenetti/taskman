@@ -15,3 +15,4 @@ project.
 - DRY (DRY.md): Don't Repeat Yourself principle.
 - Use JDoc comments for all public methods and classes.
 - Use block comments to organize sections of code in a class.
+- One interface / class per file! VERY IMPORTANT.

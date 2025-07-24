@@ -11,6 +11,9 @@
 	"mounts": [
 		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
 	],
+	"containerEnv": {
+		"TASKMAN_SERVER_URL": "http://localhost:8000"
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [5000, 5001, 5432],
 	// "portsAttributes": {

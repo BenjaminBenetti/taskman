@@ -1,19 +1,9 @@
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import type { TaskmanRouter } from "@taskman/backend";
+import { config } from "./src/config/index.ts";
 
-const client = createTRPCClient<TaskmanRouter>({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:8000",
-    }),
-  ],
-});
+// ============================================================================
+// Application startup
+// ============================================================================
 
-try {
-  // Test the config endpoint
-  const config = await client.config.clientConfig.query();
-  console.log("Config endpoint response:");
-  console.log(JSON.stringify(config, null, 2));
-} catch (error) {
-  console.error("Error calling config endpoint:", error);
-}
+console.log("CLI started successfully!");
+console.log("Complete configuration loaded:");
+console.log(JSON.stringify(config, null, 2));
