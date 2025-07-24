@@ -1,6 +1,6 @@
 import { router, publicProcedure } from "./index.ts";
 import { protectedProcedure } from "./middleware/protectedProcedure.ts";
-import { z } from "zod";
+import { configRouter } from "./routers/config.router.ts";
 
 export const appRouter = router({
   auth: router({
@@ -9,6 +9,8 @@ export const appRouter = router({
         return ctx.user;
       })
   }),
+  
+  config: configRouter,
   
   health: publicProcedure
     .query(() => {

@@ -1,5 +1,5 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import type { TaskmanRouter, HelloWorld } from "@taskman/backend";
+import type { TaskmanRouter } from "@taskman/backend";
 
 const client = createTRPCClient<TaskmanRouter>({
   links: [
@@ -10,8 +10,10 @@ const client = createTRPCClient<TaskmanRouter>({
 });
 
 try {
-  const me = await client.auth.me.query();
-  console.log("Ready for implementation");
+  // Test the config endpoint
+  const config = await client.config.clientConfig.query();
+  console.log("Config endpoint response:");
+  console.log(JSON.stringify(config, null, 2));
 } catch (error) {
-  console.error("Error calling tRPC endpoint:", error);
+  console.error("Error calling config endpoint:", error);
 }

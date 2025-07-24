@@ -1,11 +1,11 @@
 /**
- * Google OAuth configuration interface
+ * Google OAuth configuration for client applications
  */
-export interface GoogleConfig {
-  /** OIDC metadata URL for Google Idp*/
-  oidcMetadataUrl: string;
+export interface GoogleClientConfig {
   /** Google OAuth client ID for installed applications */
   clientId: string;
   /** Base redirect URI for OAuth flow (CLI will append port) */
   redirectUriBase: string;
+  /** OAuth scopes required for authentication */
+  scopes: string[];
 }

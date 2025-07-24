@@ -22,5 +22,7 @@ function getRequiredEnv(name: string): string {
 export const config: AppConfig = {
   google: {
     oidcMetadataUrl: getRequiredEnv('GOOGLE_OIDC_METADATA_URL'),
+    clientId: getRequiredEnv('GOOGLE_CLIENT_ID'),
+    redirectUriBase: getRequiredEnv('GOOGLE_REDIRECT_URI_BASE'),
   },
 };
