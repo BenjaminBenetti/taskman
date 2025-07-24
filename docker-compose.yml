@@ -6,9 +6,9 @@ services:
       POSTGRES_PASSWORD: taskman_dev
       POSTGRES_DB: taskman
     ports:
-      - "5432:5432"    
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U taskman"]
+      test: [ "CMD-SHELL", "pg_isready -U taskman" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
         condition: service_healthy
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev    
+      dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     environment:

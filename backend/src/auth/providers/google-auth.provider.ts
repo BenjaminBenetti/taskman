@@ -1,7 +1,8 @@
-import { jwtVerify } from "jose";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 import type { AuthProvider, TokenPayload } from "../interfaces/auth-provider.interface.ts";
 import type { User } from "@taskman/backend";
 import { prisma } from "../../prisma/index.ts";
+import { config } from "../../config/index.ts";
 
 /**
  * Google Authentication Provider
@@ -20,15 +21,15 @@ export class GoogleAuthProvider implements AuthProvider {
    * Private Properties
    * ======================================== */
   
-  private readonly _secret: Uint8Array;
+  private _jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+  private _oidcMetadata: { jwks_uri: string } | null = null;
   
   /* ========================================
    * Constructor
    * ======================================== */
   
   constructor() {
-    const jwtSecret = Deno.env.get("JWT_SECRET") || "your-secret-key";
-    this._secret = new TextEncoder().encode(jwtSecret);
+    // JWKS will be initialized lazily when needed
   }
   
   /* ========================================
@@ -44,7 +45,14 @@ export class GoogleAuthProvider implements AuthProvider {
    */
   async verifyToken(token: string): Promise<TokenPayload> {
     try {
-      const { payload } = await jwtVerify(token, this._secret);
+      // Initialize JWKS if not already done
+      await this._initializeJwks();
+      
+      if (!this._jwks) {
+        throw new Error("JWKS not initialized");
+      }
+      
+      const { payload } = await jwtVerify(token, this._jwks);
       
       if (!payload.sub || !payload.iss) {
         throw new Error("Invalid token: missing sub or iss claims");
@@ -75,5 +83,40 @@ export class GoogleAuthProvider implements AuthProvider {
         deletedAt: null
       }
     });
+  }
+  
+  /* ========================================
+   * Private Methods
+   * ======================================== */
+  
+  /**
+   * Initializes the JWKS by fetching OIDC metadata and setting up the remote JWKS
+   * 
+   * @throws Error if OIDC metadata cannot be fetched or JWKS URI is missing
+   */
+  private async _initializeJwks(): Promise<void> {
+    if (this._jwks) {
+      return; // Already initialized
+    }
+    
+    try {
+      // Fetch OIDC metadata to get JWKS URI
+      const response = await fetch(config.google.oidcMetadataUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch OIDC metadata: ${response.status} ${response.statusText}`);
+      }
+      
+      this._oidcMetadata = await response.json();
+      
+      if (!this._oidcMetadata?.jwks_uri) {
+        throw new Error("JWKS URI not found in OIDC metadata");
+      }
+      
+      // Create remote JWKS for token verification
+      this._jwks = createRemoteJWKSet(new URL(this._oidcMetadata.jwks_uri));
+      
+    } catch (error) {
+      throw new Error(`JWKS initialization failed: ${(error as Error).message}`);
+    }
   }
 }

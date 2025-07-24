@@ -10,6 +10,7 @@ const client = createTRPCClient<TaskmanRouter>({
 });
 
 try {
+  const me = await client.auth.me.query();
   console.log("Ready for implementation");
 } catch (error) {
   console.error("Error calling tRPC endpoint:", error);
