@@ -1,4 +1,5 @@
 import type { BackendConfig } from './backend.config.ts';
+import type { SessionConfig } from './session.config.ts';
 import type { ClientConfig } from '@taskman/backend';
 
 /**
@@ -9,4 +10,6 @@ export interface AppConfig {
   backend: BackendConfig;
   /** Client configuration from backend */
   client?: ClientConfig;
+  /** Session storage configuration */
+  session: SessionConfig;
 }
