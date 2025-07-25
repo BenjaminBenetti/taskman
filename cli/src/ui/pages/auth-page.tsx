@@ -35,22 +35,17 @@ export const AuthPage: React.FC = () => {
     if (optionText === 'Exit') {
       Deno.exit(0);
     } else if (optionText === 'Sign in with Google') {
-      try {
-        console.log('\nInitializing Google authentication...');
-        const authService = await AuthServiceFactory.createService(AuthProvider.GOOGLE);
-        
-        console.log('Starting authentication flow...');
-        const session = await authService.login();
-        
-        console.log(`\nAuthentication successful!`);
-        console.log(`Welcome, ${session.name || session.email}!`);
-        
-        // Exit the auth page and continue to main app
-        Deno.exit(0);
-      } catch (error) {
-        console.error('\nAuthentication failed:', error.message);
-        console.log('Please try again or select Exit to quit.');
-      }
+      console.log('\nInitializing Google authentication...');
+      const authService = await AuthServiceFactory.createService(AuthProvider.Google);
+      
+      console.log('Starting authentication flow...');
+      const session = await authService.login();
+      
+      console.log(`\nAuthentication successful!`);
+      console.log(`Welcome, ${session.name || session.email}!`);
+      
+      // Exit the auth page and continue to main app
+      Deno.exit(0);
     }
   };
 
