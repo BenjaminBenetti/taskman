@@ -23,6 +23,7 @@ export const config: AppConfig = {
   google: {
     oidcMetadataUrl: getRequiredEnv('GOOGLE_OIDC_METADATA_URL'),
     clientId: getRequiredEnv('GOOGLE_CLIENT_ID'),
+    clientSecret: getRequiredEnv('GOOGLE_SECRET'),
     redirectUriBase: getRequiredEnv('GOOGLE_REDIRECT_URI_BASE'),
   },
 };

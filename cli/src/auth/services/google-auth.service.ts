@@ -94,32 +94,22 @@ export class GoogleAuthService extends BaseAuthService {
       throw new Error("Google configuration not loaded");
     }
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        client_id: this.googleConfig.clientId,
-      }),
+    // Use backend endpoint for secure token refresh
+    const trpcClient = TrpcClientFactory.create();
+    const tokenData = await trpcClient.auth.google.refreshToken.mutate({
+      refreshToken: refreshToken,
     });
-
-    if (!response.ok) {
-      throw new Error(`Token refresh failed: ${response.statusText}`);
-    }
-
-    const tokenData = await response.json();
-    const userInfo = await this.fetchUserInfo(tokenData.access_token);
+    const userInfo = await this.fetchUserInfo(tokenData.accessToken);
 
     return {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token || refreshToken,
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken || refreshToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
       name: userInfo.name,
       picture: userInfo.picture,
-      expiresAt: tokenData.expires_in ? Math.floor(Date.now() / 1000) + tokenData.expires_in : undefined,
+      expiresAt: tokenData.expiresIn ? Math.floor(Date.now() / 1000) + tokenData.expiresIn : undefined,
     };
   }
 
@@ -281,35 +271,25 @@ export class GoogleAuthService extends BaseAuthService {
       throw new Error("Google configuration not loaded");
     }
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: this.googleConfig.clientId,
-        code_verifier: codeVerifier,
-        redirect_uri: `${this.googleConfig.redirectUriBase}:${redirectPort}/callback`,
-      }),
+    // Use backend endpoint for secure token exchange
+    const trpcClient = TrpcClientFactory.create();
+    const tokenData = await trpcClient.auth.google.exchangeToken.mutate({
+      code: code,
+      codeVerifier: codeVerifier,
+      redirectUri: `${this.googleConfig.redirectUriBase}:${redirectPort}/callback`,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Token exchange failed: ${response.statusText} - ${errorText}`);
-    }
-
-    const tokenData = await response.json();
-    const userInfo = await this.fetchUserInfo(tokenData.access_token);
+    const userInfo = await this.fetchUserInfo(tokenData.accessToken);
 
     return {
-      accessToken: tokenData.access_token,
-      refreshToken: tokenData.refresh_token,
+      accessToken: tokenData.accessToken,
+      refreshToken: tokenData.refreshToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
       name: userInfo.name,
       picture: userInfo.picture,
-      expiresAt: tokenData.expires_in ? Math.floor(Date.now() / 1000) + tokenData.expires_in : undefined,
+      expiresAt: tokenData.expiresIn ? Math.floor(Date.now() / 1000) + tokenData.expiresIn : undefined,
     };
   }
 
