@@ -2,14 +2,16 @@
   "name": "@taskman/cli",
   "version": "0.1.0",
   "tasks": {
-    "dev": "deno run --allow-net --allow-env --watch main.ts",
-    "start": "deno run --allow-net --allow-env main.ts"
+    "dev": "deno run --allow-net --allow-env --watch --allow-read main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read main.ts"
   },
   "exports": {
     ".": "./main.ts"
   },
   "imports": {
     "@trpc/client": "npm:@trpc/client@^11.4.3",
-    "@taskman/backend": "../backend/mod.ts"
+    "@taskman/backend": "../backend/mod.ts",
+    "react": "npm:react@^18.0.0",
+    "ink": "npm:ink@^4.0.0"
   }
 }

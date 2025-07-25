@@ -1,6 +1,8 @@
-# TaskMan
+![alt text](logo.png)
 
-A keyboard-driven task management system with AI task followup capabilities. Intended to track tasks across multiple 'real' people and continually follow up with them to get status updates using AI. built for the terminal.
+A keyboard-driven task management system with AI task followup capabilities.
+Intended to track tasks across multiple 'real' people and continually follow up
+with them to get status updates using AI. built for the terminal.
 
 ## Features
 
@@ -12,6 +14,7 @@ A keyboard-driven task management system with AI task followup capabilities. Int
 ## Architecture
 
 TaskMan uses a client-server architecture:
+
 - **Backend**: REST/TRPC API server (Deno)
 - **Database**: PostgreSQL for persistent storage
 - **CLI**: React-based TUI client (Deno + Ink)
@@ -28,6 +31,7 @@ docker-compose up --build
 ## Development
 
 The project is in early development. Current status:
+
 - ✅ Backend scaffolding with TRPC
 - ✅ Docker setup for development
 - 🚧 Core API implementation
