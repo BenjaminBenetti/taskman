@@ -1,6 +1,7 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@std/fs@*": "1.0.19",
     "npm:@prisma/client@^6.12.0": "6.12.0_prisma@6.12.0",
     "npm:@trpc/client@^11.4.3": "11.4.3_@trpc+server@11.4.3__typescript@5.8.3_typescript@5.8.3",
     "npm:@trpc/server@11.4.3": "11.4.3_typescript@5.8.3",
@@ -12,6 +13,11 @@
     "npm:prisma@latest": "6.12.0",
     "npm:react@18": "18.3.1",
     "npm:zod@4.0.5": "4.0.5"
+  },
+  "jsr": {
+    "@std/fs@1.0.19": {
+      "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06"
+    }
   },
   "npm": {
     "@alcalzone/ansi-tokenize@0.1.3": {

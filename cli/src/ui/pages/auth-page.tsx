@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Text, Box, useInput } from 'ink';
+import { AuthServiceFactory } from '../../auth/factories/auth-service.factory.ts';
+import { AuthProvider } from '../../auth/enums/auth-provider.enum.ts';
 
 const options = [
   { text: 'Sign in with Google', enabled: true },
@@ -27,12 +29,28 @@ export const AuthPage: React.FC = () => {
     }
   });
 
-  const handleSelection = (optionText: string) => {
-    // TODO: Handle the selected option
+  const handleSelection = async (optionText: string) => {
     console.log(`Selected: ${optionText}`);
 
     if (optionText === 'Exit') {
       Deno.exit(0);
+    } else if (optionText === 'Sign in with Google') {
+      try {
+        console.log('\nInitializing Google authentication...');
+        const authService = await AuthServiceFactory.createService(AuthProvider.GOOGLE);
+        
+        console.log('Starting authentication flow...');
+        const session = await authService.login();
+        
+        console.log(`\nAuthentication successful!`);
+        console.log(`Welcome, ${session.name || session.email}!`);
+        
+        // Exit the auth page and continue to main app
+        Deno.exit(0);
+      } catch (error) {
+        console.error('\nAuthentication failed:', error.message);
+        console.log('Please try again or select Exit to quit.');
+      }
     }
   };
 

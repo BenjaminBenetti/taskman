@@ -1,3 +1,5 @@
+import type { AuthProvider } from "../enums/auth-provider.enum.ts";
+
 /**
  * Represents an authentication session containing tokens and user information
  * 
@@ -15,7 +17,7 @@ export interface AuthSession {
   readonly expiresAt?: number;
   
   /** The identity provider used for authentication */
-  readonly provider: string;
+  readonly provider: AuthProvider;
   
   /** Provider-specific user identifier */
   readonly providerUserId: string;
