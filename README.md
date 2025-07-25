@@ -21,11 +21,16 @@ TaskMan uses a client-server architecture:
 
 ## Getting Started
 
+Open DevContainer and run.
+
 ```bash
 # Start the backend and database
 docker-compose up --build
 
-# Backend runs on http://localhost:8000
+# Start the CLI client
+deno task cli
+
+# Have a blast!
 ```
 
 ## Development
