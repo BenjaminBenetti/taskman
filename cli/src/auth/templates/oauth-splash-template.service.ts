@@ -117,7 +117,7 @@ export class OAuthSplashTemplateService {
         <div class="terminal-content">
             <div class="status-line">
                 <span class="success-icon" role="img" aria-label="Success checkmark">[✓]</span>
-                <span class="auth-status">AUTHENTICATED</span>
+                <span class="auth-status">Taskman AUTHENTICATED</span>
             </div>
             
             <div class="separator"></div>
