@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, Box, useInput } from 'ink';
-import { AuthServiceFactory } from '../../auth/factories/auth-service.factory.ts';
-import { AuthProvider } from '../../auth/enums/auth-provider.enum.ts';
+import { AuthServiceFactory } from '../../../auth/factories/auth-service.factory.ts';
+import { AuthProvider } from '../../../auth/enums/auth-provider.enum.ts';
 
 const options = [
   { text: 'Sign in with Google', enabled: true },

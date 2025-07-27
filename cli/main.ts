@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "ink";
-import { AuthPage } from "./src/ui/pages/auth-page.tsx";
+import { AuthPage } from "./src/ui/pages/auth/auth-method-select-page.tsx";
 import { AuthServiceFactory } from "./src/auth/factories/auth-service.factory.ts";
 
 // ============================================================================
