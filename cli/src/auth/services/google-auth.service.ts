@@ -4,6 +4,8 @@ import { AuthProvider } from "../enums/auth-provider.enum.ts";
 import type { GoogleClientConfig } from "@taskman/backend";
 import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
 import { OAuthSplashTemplateService } from "../templates/oauth-splash-template.service.ts";
+import { AuthFlowState } from "../enums/auth-flow-state.enum.ts";
+import type { AuthFlowStatus, AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
 
 /**
  * Google OAuth2 authentication service for CLI applications
@@ -26,6 +28,7 @@ export class GoogleAuthService extends BaseAuthService {
 
   private googleConfig: GoogleClientConfig | null = null;
   private templateService = new OAuthSplashTemplateService();
+  private statusCallback?: AuthFlowStatusCallback;
 
   // ================================================
   // Public Methods
@@ -49,31 +52,76 @@ export class GoogleAuthService extends BaseAuthService {
   /**
    * Perform Google OAuth2 login flow
    * 
+   * @param statusCallback Optional callback for auth flow status updates
    * @returns Promise that resolves to the authentication session
    */
-  async performLogin(): Promise<AuthSession> {
+  async performLogin(statusCallback?: AuthFlowStatusCallback): Promise<AuthSession> {
+    this.statusCallback = statusCallback;
     if (!this.googleConfig) {
       throw new Error("Google configuration not loaded. Call initialize() first.");
     }
 
-    const redirectPort = this.findAvailablePort();
-    const { authUrl, codeVerifier, state } = await this.buildAuthUrl(redirectPort);
-    
-    // Start local server to handle OAuth redirect
-    const authCodePromise = this.startRedirectServer(redirectPort, state);
-    
-    // Open browser to Google OAuth page
-    this.openBrowser(authUrl);
-    
-    console.log("Waiting for authentication...");
-    console.log("If your browser doesn't open automatically, visit:");
-    console.log(authUrl);
-    
-    // Wait for authorization code
-    const authCode = await authCodePromise;
-    
-    // Exchange authorization code for tokens
-    return await this.exchangeCodeForTokens(authCode, codeVerifier, redirectPort);
+    try {
+      // Update status: Initializing
+      this.updateStatus({
+        state: AuthFlowState.Initializing,
+        message: "Setting up authentication..."
+      });
+
+      const redirectPort = this.findAvailablePort();
+      const { authUrl, codeVerifier, state } = await this.buildAuthUrl(redirectPort);
+      
+      // Start local server to handle OAuth redirect
+      const authCodePromise = this.startRedirectServer(redirectPort, state);
+      
+      // Update status: Browser opening
+      this.updateStatus({
+        state: AuthFlowState.BrowserOpening,
+        message: "Opening browser for authentication..."
+      });
+      
+      // Open browser to Google OAuth page
+      this.openBrowser(authUrl);
+      
+      // Update status: Waiting for user
+      this.updateStatus({
+        state: AuthFlowState.WaitingForUser,
+        message: "Please complete authentication in your browser...",
+        authUrl: authUrl
+      });
+      
+      // Wait for authorization code
+      const authCode = await authCodePromise;
+      
+      // Update status: Processing token
+      this.updateStatus({
+        state: AuthFlowState.ProcessingToken,
+        message: "Processing authentication token..."
+      });
+      
+      // Exchange authorization code for tokens
+      const session = await this.exchangeCodeForTokens(authCode, codeVerifier, redirectPort);
+      
+      // Update status: Success
+      this.updateStatus({
+        state: AuthFlowState.Success,
+        message: `Welcome, ${session.name || session.email}!`
+      });
+      
+      return session;
+    } catch (error) {
+      // Update status: Error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      this.updateStatus({
+        state: AuthFlowState.Error,
+        message: "Authentication failed",
+        error: {
+          code: 'AUTH_FAILED',
+          description: errorMessage
+        }
+      });
+      throw error;
+    }
   }
 
   /**
@@ -90,8 +138,8 @@ export class GoogleAuthService extends BaseAuthService {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
-      } catch (error) {
-        console.warn("Failed to revoke Google token:", error);
+      } catch (_error) {
+        // Token revocation failed - this is not critical for logout
       }
     }
   }
@@ -129,6 +177,15 @@ export class GoogleAuthService extends BaseAuthService {
   // ================================================
   // Private Implementation
   // ================================================
+
+  /**
+   * Update authentication flow status
+   * 
+   * @param status Current authentication flow status
+   */
+  private updateStatus(status: AuthFlowStatus): void {
+    this.statusCallback?.(status);
+  }
 
   /**
    * Build Google OAuth2 authorization URL with PKCE
@@ -200,9 +257,8 @@ export class GoogleAuthService extends BaseAuthService {
             // Server started successfully
           },
         },
-        async (request) => {
-          console.log(`Received request: ${request.method} ${request.url}`);
-          const {response, authCode} = await this.handleOAuthCallback(request, expectedState, controller);
+        (request) => {
+          const {response, authCode} = this.handleOAuthCallback(request, expectedState, controller);
           if (authCode) {
           resolve(authCode);  
           } else {
@@ -224,11 +280,11 @@ export class GoogleAuthService extends BaseAuthService {
    * @returns Promise that resolves to the authorization code, or null for non-callback requests
    * @throws Error if OAuth fails or validation fails
    */
-  private async handleOAuthCallback(
+  private handleOAuthCallback(
     request: Request,
     expectedState: string,
     controller: AbortController
-  ): Promise<{response: Response, authCode?: string}> {
+  ): {response: Response, authCode?: string} {
     const url = new URL(request.url);
     
     if (url.pathname !== '/callback') {
@@ -252,7 +308,7 @@ export class GoogleAuthService extends BaseAuthService {
         }
       );
       
-      const _ = await this.scheduleServerShutdown(controller);
+      this.scheduleServerShutdown(controller);
       return {response};
     }
 
@@ -270,7 +326,7 @@ export class GoogleAuthService extends BaseAuthService {
         }
       );
       
-      const _ = await this.scheduleServerShutdown(controller);
+      this.scheduleServerShutdown(controller);
       return {response};
     }
 
@@ -285,7 +341,7 @@ export class GoogleAuthService extends BaseAuthService {
       }
     );
     
-    const _ = this.scheduleServerShutdown(controller);
+    this.scheduleServerShutdown(controller);
     return {response, authCode: code};
   }
 
@@ -315,8 +371,8 @@ export class GoogleAuthService extends BaseAuthService {
     try {
       const process = new Deno.Command(cmd[0], { args: cmd.slice(1) });
       process.spawn();
-    } catch (error) {
-      console.warn("Failed to open browser automatically:", error);
+    } catch (_error) {
+      // Browser failed to open - status will be updated with URL for manual access
     }
   }
 

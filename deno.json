@@ -3,5 +3,12 @@
   "tasks": {
     "cli": "cd cli && deno task start",
     "cli:dev": "cd cli && deno task dev"
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "verbatim-module-syntax"
+      ]
+    }
   }
 }

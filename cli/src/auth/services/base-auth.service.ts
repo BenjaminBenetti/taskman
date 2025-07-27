@@ -1,5 +1,6 @@
 import type { AuthService } from "../interfaces/auth-service.interface.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
+import type { AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
 import { config } from "../../config/index.ts";
 
 /**
@@ -19,9 +20,10 @@ export abstract class BaseAuthService implements AuthService {
   /**
    * Abstract method for provider-specific login implementation
    * 
+   * @param statusCallback Optional callback for authentication flow status updates
    * @returns Promise that resolves to the authentication session
    */
-  abstract performLogin(): Promise<AuthSession>;
+  abstract performLogin(statusCallback?: AuthFlowStatusCallback): Promise<AuthSession>;
 
   /**
    * Abstract method for provider-specific logout implementation
@@ -45,10 +47,11 @@ export abstract class BaseAuthService implements AuthService {
   /**
    * Initiate the login flow
    * 
+   * @param statusCallback Optional callback for authentication flow status updates
    * @returns Promise that resolves to the authentication session
    */
-  public async login(): Promise<AuthSession> {
-    this.session = await this.performLogin();
+  public async login(statusCallback?: AuthFlowStatusCallback): Promise<AuthSession> {
+    this.session = await this.performLogin(statusCallback);
     await this.persistSession();
     return this.session;
   }

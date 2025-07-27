@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Text, Box, useInput } from 'ink';
-import { AuthServiceFactory } from '../../../auth/factories/auth-service.factory.ts';
-import { AuthProvider } from '../../../auth/enums/auth-provider.enum.ts';
+import { GoogleAuthPage } from './google-auth-page.tsx';
+import type { AuthSession } from '../../../auth/interfaces/auth-session.interface.ts';
 
 const options = [
   { text: 'Sign in with Google', enabled: true },
@@ -15,8 +15,12 @@ const options = [
  */
 export const AuthPage: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState<'select' | 'google'>('select');
 
   useInput((input, key) => {
+    // Only handle input on the select page
+    if (currentPage !== 'select') return;
+    
     if (key.downArrow || input === 'j' || key.tab) {
       setSelectedIndex((prev: number) => (prev + 1) % options.length);
     } else if (key.upArrow || input === 'k') {
@@ -29,26 +33,41 @@ export const AuthPage: React.FC = () => {
     }
   });
 
-  const handleSelection = async (optionText: string) => {
-    console.log(`Selected: ${optionText}`);
-
+  const handleSelection = (optionText: string) => {
     if (optionText === 'Exit') {
       Deno.exit(0);
     } else if (optionText === 'Sign in with Google') {
-      console.log('\nInitializing Google authentication...');
-      const authService = await AuthServiceFactory.createService(AuthProvider.Google);
-      
-      console.log('Starting authentication flow...');
-      const session = await authService.login();
-      
-      console.log(`\nAuthentication successful!`);
-      console.log(`Welcome, ${session.name || session.email}!`);
-      
-      // Exit the auth page and continue to main app
-      Deno.exit(0);
+      setCurrentPage('google');
     }
   };
 
+  const handleAuthSuccess = (_session: AuthSession) => {
+    // Authentication successful - exit and continue to main app
+    Deno.exit(0);
+  };
+
+  const handleAuthError = (_error: Error) => {
+    // Return to selection page on error
+    setCurrentPage('select');
+  };
+
+  const handleAuthCancel = () => {
+    // Return to selection page on cancel
+    setCurrentPage('select');
+  };
+
+  // Render Google auth page if selected
+  if (currentPage === 'google') {
+    return (
+      <GoogleAuthPage
+        onAuthSuccess={handleAuthSuccess}
+        onAuthError={handleAuthError}
+        onCancel={handleAuthCancel}
+      />
+    );
+  }
+
+  // Render auth method selection page
   return (
     <Box flexDirection="column" padding={1}>
       <Box flexDirection="column">

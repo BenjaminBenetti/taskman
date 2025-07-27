@@ -1,4 +1,5 @@
 import { AuthSession } from "./auth-session.interface.ts";
+import type { AuthFlowStatusCallback } from "./auth-flow-status.interface.ts";
 
 /**
  * Authentication service interface for CLI applications
@@ -10,9 +11,10 @@ export interface AuthService {
   /**
    * Initiate the login flow for this authentication provider
    * 
+   * @param statusCallback Optional callback for authentication flow status updates
    * @returns Promise that resolves to the authentication session
    */
-  login(): Promise<AuthSession>;
+  login(statusCallback?: AuthFlowStatusCallback): Promise<AuthSession>;
   
   /**
    * Log out the current user and clear the session

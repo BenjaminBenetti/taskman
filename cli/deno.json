@@ -12,6 +12,7 @@
     "@trpc/client": "npm:@trpc/client@^11.4.3",
     "@taskman/backend": "../backend/mod.ts",
     "react": "npm:react@^18.0.0",
-    "ink": "npm:ink@^4.0.0"
+    "ink": "npm:ink@^4.0.0",
+    "ink-link": "npm:ink-link@4.1.0"
   }
 }
