@@ -10,4 +10,4 @@ echo '127.0.0.1 postgres' | sudo tee -a /etc/hosts
 deno install
 pushd /workspaces/taskman/backend
 deno run -A npm:prisma@latest generate
-popd
+popdT
