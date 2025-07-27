@@ -36,9 +36,9 @@ Deno.test("OAuthSplashTemplateService", async (t) => {
       
       // Check for success-specific styling
       assertStringIncludes(html, "success-icon");
-      assertStringIncludes(html, "checkmark-bounce");
-      assertStringIncludes(html, "#10b981"); // Success green color
-      assertStringIncludes(html, "✓"); // Checkmark symbol
+      assertStringIncludes(html, "terminal-header");
+      assertStringIncludes(html, "#00FF66"); // Terminal success green color
+      assertStringIncludes(html, "[✓]"); // Terminal checkmark symbol
     });
 
     await t.step("should include countdown functionality", () => {
@@ -129,9 +129,9 @@ Deno.test("OAuthSplashTemplateService", async (t) => {
       
       // Check for error-specific styling
       assertStringIncludes(html, "error-icon");
-      assertStringIncludes(html, "shake");
-      assertStringIncludes(html, "#ef4444"); // Error red color
-      assertStringIncludes(html, "✕"); // X symbol
+      assertStringIncludes(html, "terminal-header");
+      assertStringIncludes(html, "#FF3366"); // Terminal error red color
+      assertStringIncludes(html, "[✗]"); // Terminal X symbol
     });
 
     await t.step("should display error message", () => {
@@ -254,8 +254,9 @@ Deno.test("OAuthSplashTemplateService", async (t) => {
       
       // Success page CSS classes
       const successClasses = [
-        "container", "success-icon", "message", "countdown-container", 
-        "countdown-text", "countdown", "close-button"
+        "container", "terminal-header", "terminal-content", "status-line",
+        "success-icon", "auth-status", "separator", "message", "countdown-container", 
+        "countdown-text", "countdown", "actions", "keyboard-hint", "close-button"
       ];
       
       for (const className of successClasses) {
@@ -264,8 +265,9 @@ Deno.test("OAuthSplashTemplateService", async (t) => {
       
       // Error page CSS classes
       const errorClasses = [
-        "container", "error-icon", "error-message", "error-description",
-        "actions", "retry-button", "close-button", "help-text"
+        "container", "terminal-header", "terminal-content", "status-line",
+        "error-icon", "auth-status", "separator", "error-message", "error-description",
+        "actions", "keyboard-hint", "button-group", "retry-button", "close-button", "help-text"
       ];
       
       for (const className of errorClasses) {
@@ -277,21 +279,22 @@ Deno.test("OAuthSplashTemplateService", async (t) => {
       const successHtml = service.generateSuccessPage();
       const errorHtml = service.generateErrorPage("Test error");
       
-      // Success colors (green theme)
-      assertStringIncludes(successHtml, "#10b981"); // Success green
-      assertStringIncludes(successHtml, "#059669"); // Hover green
+      // Terminal colors (TASKMAN theme)
+      assertStringIncludes(successHtml, "#00FF66"); // Terminal success green
+      assertStringIncludes(successHtml, "#0A0A0A"); // Terminal background
       
-      // Error colors (red theme)
-      assertStringIncludes(errorHtml, "#ef4444"); // Error red
-      assertStringIncludes(errorHtml, "#dc2626"); // Darker red
+      // Error colors (TASKMAN theme)
+      assertStringIncludes(errorHtml, "#FF3366"); // Terminal error red
+      assertStringIncludes(errorHtml, "#0A0A0A"); // Terminal background
     });
 
     await t.step("should include animations", () => {
       const successHtml = service.generateSuccessPage();
       const errorHtml = service.generateErrorPage("Test error");
       
-      assertStringIncludes(successHtml, "@keyframes checkmark-bounce");
-      assertStringIncludes(errorHtml, "@keyframes shake");
+      // Terminal aesthetic - no animations, monospace fonts
+      assertStringIncludes(successHtml, "Courier New");
+      assertStringIncludes(errorHtml, "Courier New");
     });
   });
 
