@@ -1,35 +1,75 @@
-# Primary Role
+# CLAUDE.md
 
-You are a Taskmaster, an expert in managing and coordinating sub-agents to
-accomplish complex tasks. Your primary responsibility is to ensure that the
-right agents are assigned to the right tasks based on their expertise and
-capabilities. You use as many parallel agents as is reasonable to efficiently
-complete tasks while maintaining high quality and accuracy. You works with the
-user to clarify requirements, gather necessary information, and ensure that the
-final output meets the user's needs.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
-# Subagent Use
+## Development Commands
 
-You never edit anything directly your self. You are an overseer of the
-subagents. You will assign subagents to tasks based on their expertise and
-capabilities. You will ensure that the subagents are working efficiently and
-effectively.
+```bash
+# Start the backend and database services
+docker-compose up --build
 
-# Implementing a change
+# Start CLI client in development mode
+deno task cli:dev
 
-You must follow these steps when implementing a change:
+# Start CLI client normally
+deno task cli
+```
 
-1. **Identify the Change**: Understand the change that needs to be made.
-2. **Assign Research Subagent**: If the change involoves using libraries or
-   frameworks, assign the `library-research-specialist` subagent to gather
-   information. And provide insight in to the best practices around these
-   libraries.
-3. **Assign Code Architect Subagent**: If the change involves editing code,
-   assign the `feature-architect` subagent to plan the implementation.
-4. **Assign Clean Code Engineer Subagent**: To implement the plan from the
-   `feature-architect`, assign the `clean-code-engineer` subagent to write or
-   refactor the code.
-5. **Assign Code Structure Reviewer Subagents**: If the `clean-code-engineer`
-   makes changes to ANY files, then assign the following reviewers in parallel:
-   - `code-structure-reviewer`
-   - `code-maintainability-reviewer`
+## Architecture Overview
+
+TaskMan is a keyboard-driven task management system with AI capabilities using a
+client-server architecture:
+
+- **Backend** (`/backend`): TRPC API server with Prisma ORM, handles data
+  persistence and AI tasks
+- **CLI** (`/cli`): React-based TUI client using Ink, connects to backend via
+  TRPC
+- **Database**: PostgreSQL for persistent storage (via Docker)
+
+## Key Technologies
+
+- **Runtime**: Deno 2.4.2 (both backend and CLI)
+- **Backend**: TRPC, Prisma ORM, PostgreSQL, Jose (JWT)
+- **CLI**: React 18.x, Ink TUI library
+- **Database**: PostgreSQL 17 (Docker container)
+
+## Project Structure
+
+```
+/backend          # TRPC API server
+ src/
+    auth/     # Authentication (Google OAuth)
+    config/   # Configuration management
+    trpc/     # TRPC routers and middleware
+    prisma/   # Database connection
+ prisma/       # Database schema and migrations
+
+/cli              # Terminal UI client
+ src/
+    auth/     # Client-side auth services
+    config/   # Client configuration
+    trpc/     # TRPC client factory
+    ui/       # React components for TUI
+```
+
+## Authentication System
+
+The system uses Google OAuth with JWT tokens:
+
+- Backend handles token exchange and refresh
+- CLI manages auth sessions locally
+- Multi-tenant support with tenant isolation
+
+## Database
+
+Uses Prisma ORM with PostgreSQL:
+
+- Migrations in `/backend/prisma/migrations/`
+- Schema defined in `/backend/prisma/schema.prisma`
+- Generated client in `/backend/src/generated/prisma/`
+
+## Development Environment
+
+The project is designed to run in a DevContainer with Docker Compose managing
+the PostgreSQL database and backend services.

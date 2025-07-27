@@ -3,6 +3,7 @@ import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import { AuthProvider } from "../enums/auth-provider.enum.ts";
 import type { GoogleClientConfig } from "@taskman/backend";
 import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
+import { OAuthSplashTemplateService } from "../templates/oauth-splash-template.service.ts";
 
 /**
  * Google OAuth2 authentication service for CLI applications
@@ -12,7 +13,19 @@ import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
  * via a temporary local HTTP server.
  */
 export class GoogleAuthService extends BaseAuthService {
+  /**
+   * Delay in milliseconds before shutting down the OAuth redirect server.
+   * 
+   * This delay is necessary to ensure HTTP responses are fully transmitted
+   * to the browser before the server is shut down. Without this delay,
+   * there's a race condition where the server might close the connection
+   * before the browser receives the complete response, resulting in
+   * connection errors or incomplete page rendering.
+   */
+  private static readonly SERVER_SHUTDOWN_DELAY_MS = 2000;
+
   private googleConfig: GoogleClientConfig | null = null;
+  private templateService = new OAuthSplashTemplateService();
 
   // ============================================================================
   // Public Methods
@@ -50,7 +63,7 @@ export class GoogleAuthService extends BaseAuthService {
     const authCodePromise = this.startRedirectServer(redirectPort, state);
     
     // Open browser to Google OAuth page
-    await this.openBrowser(authUrl);
+    this.openBrowser(authUrl);
     
     console.log("Waiting for authentication...");
     console.log("If your browser doesn't open automatically, visit:");
@@ -176,9 +189,9 @@ export class GoogleAuthService extends BaseAuthService {
    * @returns Promise that resolves to the authorization code
    */
   private startRedirectServer(port: number, expectedState: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const controller = new AbortController();
-      
+    const controller = new AbortController();
+    
+    return new Promise<string>((resolve, reject) => {
       Deno.serve(
         {
           port,
@@ -187,46 +200,95 @@ export class GoogleAuthService extends BaseAuthService {
             // Server started successfully
           },
         },
-        (request) => {
-          const url = new URL(request.url);
-          
-          if (url.pathname === '/callback') {
-            const code = url.searchParams.get('code');
-            const state = url.searchParams.get('state');
-            const error = url.searchParams.get('error');
-
-            if (error) {
-              const errorDescription = url.searchParams.get('error_description') || error;
-              controller.abort();
-              reject(new Error(`OAuth error: ${errorDescription}`));
-              return new Response(
-                `<html><body><h1>Authentication Failed</h1><p>${errorDescription}</p></body></html>`,
-                { status: 400, headers: { 'Content-Type': 'text/html' } }
-              );
-            }
-
-            if (!code || state !== expectedState) {
-              controller.abort();
-              reject(new Error("Invalid OAuth response"));
-              return new Response(
-                '<html><body><h1>Authentication Failed</h1><p>Invalid request parameters</p></body></html>',
-                { status: 400, headers: { 'Content-Type': 'text/html' } }
-              );
-            }
-
-            controller.abort();
-            resolve(code);
-            return new Response(
-              '<html><body><h1>Authentication Successful!</h1><p>You can close this window and return to the terminal.</p></body></html>',
-              { headers: { 'Content-Type': 'text/html' } }
-            );
+        async (request) => {
+          console.log(`Received request: ${request.method} ${request.url}`);
+          const {response, authCode} = await this.handleOAuthCallback(request, expectedState, controller);
+          if (authCode) {
+          resolve(authCode);  
+          } else {
+            reject(new Error("Authentication failed or invalid request"));
           }
-
-          return new Response("Not Found", { status: 404 });
+          // Send response to browser
+          return response;
         }
       );
     });
   }
+
+  /**
+   * Handle OAuth callback request and process authentication response
+   * 
+   * @param request The incoming HTTP request
+   * @param expectedState Expected state parameter for CSRF protection
+   * @param controller AbortController for server shutdown
+   * @returns Promise that resolves to the authorization code, or null for non-callback requests
+   * @throws Error if OAuth fails or validation fails
+   */
+  private async handleOAuthCallback(
+    request: Request,
+    expectedState: string,
+    controller: AbortController
+  ): Promise<{response: Response, authCode?: string}> {
+    const url = new URL(request.url);
+    
+    if (url.pathname !== '/callback') {
+      return {response: new Response("Not Found", { status: 404 })};
+    }
+
+    const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
+    const error = url.searchParams.get('error');
+
+    // Handle OAuth error responses
+    if (error) {
+      const errorDescription = url.searchParams.get('error_description') || error;
+      
+      // Send error response to browser
+      const response = new Response(
+        this.templateService.generateErrorPage(error, errorDescription),
+        { 
+          headers: { 'Content-Type': 'text/html' },
+          status: 400,
+        }
+      );
+      
+      const _ = await this.scheduleServerShutdown(controller);
+      return {response};
+    }
+
+    // Validate authorization code and state parameter
+    if (!code || state !== expectedState) {
+      // Send error response to browser
+      const response = new Response(
+        this.templateService.generateErrorPage(
+          'Authentication Failed',
+          'Invalid request parameters. This may be due to a security issue or session timeout.'
+        ),
+        { 
+          headers: { 'Content-Type': 'text/html' },
+          status: 400,
+        }
+      );
+      
+      const _ = await this.scheduleServerShutdown(controller);
+      return {response};
+    }
+
+    // Success case - send success page to browser
+    const response = new Response(
+      this.templateService.generateSuccessPage(
+        'Authentication successful! You can close this window and return to the terminal.'
+      ),
+      {
+        headers: { 'Content-Type': 'text/html' },
+        status: 200,
+      }
+    );
+    
+    const _ = this.scheduleServerShutdown(controller);
+    return {response, authCode: code};
+  }
+
 
   /**
    * Open browser to the authentication URL
@@ -234,7 +296,7 @@ export class GoogleAuthService extends BaseAuthService {
    * @param url URL to open in browser
    * @returns Promise that resolves when browser command is executed
    */
-  private async openBrowser(url: string): Promise<void> {
+  private openBrowser(url: string): void {
     const os = Deno.build.os;
     let cmd: string[];
 
@@ -359,5 +421,34 @@ export class GoogleAuthService extends BaseAuthService {
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=/g, '');
+  }
+
+  /**
+   * Schedule the shutdown of the OAuth redirect server with a configurable delay.
+   * 
+   * This method addresses a critical timing race condition in the OAuth flow where
+   * the server might shut down before the HTTP response is fully transmitted to
+   * the browser. Without this delay, users may see connection errors or incomplete
+   * page renders even though the authentication was successful.
+   * 
+   * The delay ensures that:
+   * 1. The HTTP response (success or error page) is fully transmitted
+   * 2. The browser has time to render the page completely
+   * 3. The user sees appropriate feedback before the server closes
+   * 
+   * @param controller AbortController used to shutdown the HTTP server
+   * @param delayMs Optional delay in milliseconds (defaults to SERVER_SHUTDOWN_DELAY_MS)
+   * @returns Promise that resolves after the delay and server shutdown
+   */
+  private scheduleServerShutdown(
+    controller: AbortController,
+    delayMs: number = GoogleAuthService.SERVER_SHUTDOWN_DELAY_MS
+  ): Promise<void> {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        controller.abort();
+        resolve();
+      }, delayMs);
+    });
   }
 }
