@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { TasksPageProps } from '../../components/dashboard.types.ts';
+import type { TasksPageProps } from '../../components/dashboard/dashboard.types.ts';
 
 // ================================================
 // Tasks Page

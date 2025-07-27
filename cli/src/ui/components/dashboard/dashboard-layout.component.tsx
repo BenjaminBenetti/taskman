@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, useStdout } from 'ink';
 import type { DashboardLayoutProps } from './dashboard.types.ts';
-import { Header } from './header.component.tsx';
-import { TabNavigation } from './tab-navigation.component.tsx';
-import { useTabNavigation } from '../hooks/use-tab-navigation.hook.tsx';
+import { Header } from '../header/header.component.tsx';
+import { TabNavigation } from '../tab-navigation/tab-navigation.component.tsx';
+import { useTabNavigation } from '../../hooks/navigation/use-tab-navigation.hook.tsx';
 
 // Import page components
-import { DashboardMainPage } from '../pages/dashboard/dashboard-main-page.tsx';
-import { TasksPage } from '../pages/tasks/tasks-page.tsx';
-import { AgentPage } from '../pages/agent/agent-page.tsx';
-import { SettingsPage } from '../pages/settings/settings-page.tsx';
+import { DashboardMainPage } from '../../pages/dashboard/dashboard-main-page.tsx';
+import { TasksPage } from '../../pages/tasks/tasks-page.tsx';
+import { AgentPage } from '../../pages/agent/agent-page.tsx';
+import { SettingsPage } from '../../pages/settings/settings-page.tsx';
 
 // ================================================
 // Dashboard Layout Component

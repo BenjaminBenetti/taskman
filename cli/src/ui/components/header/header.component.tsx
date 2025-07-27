@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { HeaderProps } from './dashboard.types.ts';
-import { Logo } from './logo.component.tsx';
+import type { HeaderProps } from '../dashboard/dashboard.types.ts';
+import { Logo } from '../logo/logo.component.tsx';
 
 // ================================================
 // Header Component

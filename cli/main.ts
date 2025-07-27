@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "ink";
 import { AuthPage } from "./src/ui/pages/auth/auth-method-select-page.tsx";
-import { DashboardLayout } from "./src/ui/components/dashboard-layout.component.tsx";
+import { DashboardLayout } from "./src/ui/components/dashboard/dashboard-layout.component.tsx";
 import { AuthServiceFactory } from "./src/auth/factories/auth-service.factory.ts";
 
 // ================================================

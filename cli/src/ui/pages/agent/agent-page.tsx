@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { AgentPageProps } from '../../components/dashboard.types.ts';
+import type { AgentPageProps } from '../../components/dashboard/dashboard.types.ts';
 
 // ================================================
 // Agent Page

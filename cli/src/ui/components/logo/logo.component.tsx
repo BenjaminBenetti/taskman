@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { LogoProps } from './dashboard.types.ts';
+import type { LogoProps } from '../dashboard/dashboard.types.ts';
 
 // ================================================
 // Logo Component

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { TabNavigationProps } from './dashboard.types.ts';
+import type { TabNavigationProps } from '../dashboard/dashboard.types.ts';
 
 // ================================================
 // Tab Navigation Component

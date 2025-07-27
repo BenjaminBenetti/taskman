@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { SettingsPageProps } from '../../components/dashboard.types.ts';
+import type { SettingsPageProps } from '../../components/dashboard/dashboard.types.ts';
 
 // ================================================
 // Settings Page

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Box } from 'ink';
-import type { DashboardMainPageProps } from '../../components/dashboard.types.ts';
+import type { DashboardMainPageProps } from '../../components/dashboard/dashboard.types.ts';
 
 // ================================================
 // Dashboard Main Page
