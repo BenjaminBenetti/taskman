@@ -6,6 +6,10 @@
  */
 export class OAuthSplashTemplateService {
   
+  // ================================================
+  // Public Methods
+  // ================================================
+
   /**
    * Generate a styled success page with terminal aesthetic
    * 
@@ -286,6 +290,10 @@ export class OAuthSplashTemplateService {
     
     return html;
   }
+
+  // ================================================
+  // Private Methods
+  // ================================================
   
   /**
    * Sanitize HTML content to prevent XSS attacks

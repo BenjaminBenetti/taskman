@@ -16,9 +16,9 @@ export class AuthServiceFactory {
   private static instance: AuthService | null = null;
   private static currentProvider: AuthProvider | null = null;
 
-  // ============================================================================
+  // ================================================
   // Public Static Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Get the current authentication service instance
@@ -96,9 +96,9 @@ export class AuthServiceFactory {
     return this.currentProvider;
   }
 
-  // ============================================================================
+  // ================================================
   // Private Static Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Initialize the factory from an existing session file

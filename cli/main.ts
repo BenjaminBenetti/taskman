@@ -3,9 +3,9 @@ import { render } from "ink";
 import { AuthPage } from "./src/ui/pages/auth/auth-method-select-page.tsx";
 import { AuthServiceFactory } from "./src/auth/factories/auth-service.factory.ts";
 
-// ============================================================================
+// ================================================
 // Application startup
-// ============================================================================
+// ================================================
 
 async function main() {
   // Check if user is authenticated using the factory

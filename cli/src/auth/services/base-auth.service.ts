@@ -12,9 +12,9 @@ import { config } from "../../config/index.ts";
 export abstract class BaseAuthService implements AuthService {
   private session: AuthSession | null = null;
 
-  // ============================================================================
+  // ================================================
   // Abstract Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Abstract method for provider-specific login implementation
@@ -38,9 +38,9 @@ export abstract class BaseAuthService implements AuthService {
    */
   protected abstract performRefresh(refreshToken: string): Promise<AuthSession>;
 
-  // ============================================================================
+  // ================================================
   // Public Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Initiate the login flow
@@ -116,9 +116,9 @@ export abstract class BaseAuthService implements AuthService {
     }
   }
 
-  // ============================================================================
+  // ================================================
   // Private Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Get the session file path with home directory expansion

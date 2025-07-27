@@ -11,9 +11,9 @@ import type { GoogleTokenRefreshResponse } from "../interfaces/google-token-refr
  * operations while keeping the client secret confidential.
  */
 export class GoogleTokenExchangeService {
-  // ============================================================================
+  // ================================================
   // Public Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Exchange authorization code for access and refresh tokens

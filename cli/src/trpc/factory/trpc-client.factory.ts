@@ -5,9 +5,9 @@ import type { TaskmanRouter } from "@taskman/backend";
  * Factory for creating TRPC clients
  */
 export class TrpcClientFactory {
-  // ============================================================================
+  // ================================================
   // Static methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Creates a new TRPC client instance

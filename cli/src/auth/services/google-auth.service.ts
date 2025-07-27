@@ -27,9 +27,9 @@ export class GoogleAuthService extends BaseAuthService {
   private googleConfig: GoogleClientConfig | null = null;
   private templateService = new OAuthSplashTemplateService();
 
-  // ============================================================================
+  // ================================================
   // Public Methods
-  // ============================================================================
+  // ================================================
 
   /**
    * Initialize the service by fetching Google OAuth configuration
@@ -42,9 +42,9 @@ export class GoogleAuthService extends BaseAuthService {
     this.googleConfig = clientConfig.auth.google;
   }
 
-  // ============================================================================
+  // ================================================
   // Protected Implementation
-  // ============================================================================
+  // ================================================
 
   /**
    * Perform Google OAuth2 login flow
@@ -126,9 +126,9 @@ export class GoogleAuthService extends BaseAuthService {
     };
   }
 
-  // ============================================================================
+  // ================================================
   // Private Implementation
-  // ============================================================================
+  // ================================================
 
   /**
    * Build Google OAuth2 authorization URL with PKCE
