@@ -21,7 +21,7 @@ export const config: AppConfig = {
     url: getEnv('TASKMAN_SERVER_URL', 'https://taskman.bbenetti.ca'),
   },
   session: {
-    filePath: getEnv('TASKMAN_SESSION_PATH', '~/.taskman/.session'),
+    filePath: getEnv('TASKMAN_SESSION_PATH', '~/.taskman/session'),
   },
   client: await new ConfigService().load()
 };
