@@ -1,54 +1,27 @@
 import React from 'react';
-import { Box, Text } from 'ink';
+import { Text, Box } from 'ink';
 
 /**
- * GitHub login ASCII art component
+ * Simple "GitHub Login" title component
  * 
- * Displays stylized GitHub branding for the authentication flow.
- * Uses colors that complement the GitHub brand identity.
+ * Uses the TaskMan color scheme with clean, readable text to create
+ * a visually appealing header for the GitHub authentication flow.
  */
 export const GitHubLoginAsciiArt: React.FC = () => {
   return (
     <Box flexDirection="column" alignItems="center">
-      {/* GitHub Icon ASCII Art */}
+      {/* ASCII Art for "GitHub Login" on single line */}
       <Box flexDirection="column" alignItems="center" marginBottom={1}>
-        <Text bold color="white">
-          {`    ████████████████████████    `}
-        </Text>
-        <Text bold color="white">
-          {`  ██                      ██  `}
-        </Text>
-        <Text bold color="white">
-          {`██    ████████████████    ██`}
-        </Text>
-        <Text bold color="white">
-          {`██  ██                ██  ██`}
-        </Text>
-        <Text bold color="white">
-          {`██    ██████    ██████    ██`}
-        </Text>
-        <Text bold color="white">
-          {`██                        ██`}
-        </Text>
-        <Text bold color="white">
-          {`██  ████    ████    ████  ██`}
-        </Text>
-        <Text bold color="white">
-          {`  ██    ████    ████    ██  `}
-        </Text>
-        <Text bold color="white">
-          {`    ████████████████████    `}
-        </Text>
+        <Text color="redBright">  ██████  ██ ████████ ██   ██ ██    ██ ██████        ██       ██████   ██████  ██ ███    ██ </Text>
+        <Text color="yellowBright"> ██       ██    ██    ██   ██ ██    ██ ██   ██       ██      ██    ██ ██       ██ ████   ██ </Text>
+        <Text color="greenBright"> ██   ███ ██    ██    ███████ ██    ██ ██████        ██      ██    ██ ██   ███ ██ ██ ██  ██ </Text>
+        <Text color="cyanBright"> ██    ██ ██    ██    ██   ██ ██    ██ ██   ██       ██      ██    ██ ██    ██ ██ ██  ██ ██ </Text>
+        <Text color="blueBright">  ██████  ██    ██    ██   ██  ██████  ██████        ███████  ██████   ██████  ██ ██   ████ </Text>
       </Box>
-
-      {/* GitHub Branding */}
-      <Box flexDirection="column" alignItems="center">
-        <Text bold color="white" fontSize={18}>
-          Sign in with GitHub
-        </Text>
-        <Text color="gray" dimColor>
-          Authenticate with your GitHub account
-        </Text>
+      
+      {/* Decorative underline */}
+      <Box justifyContent="center">
+        <Text color="magentaBright">{'═'.repeat(95)}</Text>
       </Box>
     </Box>
   );
