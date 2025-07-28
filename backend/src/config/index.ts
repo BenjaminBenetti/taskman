@@ -1,5 +1,6 @@
 // Type exports
 export type { GoogleConfig } from './google.config.ts';
+export type { GitHubConfig } from './github.config.ts';
 export type { AppConfig } from './app.config.ts';
 
 // Import types for config implementation
@@ -25,5 +26,10 @@ export const config: AppConfig = {
     clientId: getRequiredEnv('GOOGLE_CLIENT_ID'),
     clientSecret: getRequiredEnv('GOOGLE_SECRET'),
     redirectUriBase: getRequiredEnv('GOOGLE_REDIRECT_URI_BASE'),
+  },
+  github: {
+    clientId: getRequiredEnv('GITHUB_CLIENT_ID'),
+    clientSecret: getRequiredEnv('GITHUB_SECRET'),
+    redirectUriBase: getRequiredEnv('GITHUB_REDIRECT_URI_BASE'),
   },
 };

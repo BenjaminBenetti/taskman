@@ -2,6 +2,7 @@ import type { AuthService } from "../interfaces/auth-service.interface.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import { AuthProvider, toAuthProvider } from "../enums/auth-provider.enum.ts";
 import { GoogleAuthService } from "../services/google-auth.service.ts";
+import { GitHubAuthService } from "../services/github-auth.service.ts";
 import { config } from "../../config/index.ts";
 import { exists } from "jsr:@std/fs/exists";
 
@@ -142,8 +143,9 @@ export class AuthServiceFactory {
       }
       
       case AuthProvider.GitHub: {
-        // TODO: Implement GitHubAuthService when ready
-        throw new Error('GitHub authentication not yet implemented');
+        const githubService = new GitHubAuthService();
+        await githubService.initialize();
+        return githubService;
       }
       
       case AuthProvider.Apple: {

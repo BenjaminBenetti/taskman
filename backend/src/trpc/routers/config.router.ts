@@ -15,6 +15,11 @@ export const configRouter = router({
         clientId: config.google.clientId,
         redirectUriBase: config.google.redirectUriBase,
         scopes: ['openid', 'profile', 'email']
+      },
+      github: {
+        clientId: config.github.clientId,
+        redirectUriBase: config.github.redirectUriBase,
+        scopes: ['user:email', 'read:user']
       }
     }
   }))

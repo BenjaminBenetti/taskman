@@ -1,7 +1,9 @@
 export type { AppConfig } from './app.config.ts';
 export type { BackendConfig } from './backend.config.ts';
 export type { SessionConfig } from './session.config.ts';
+export type { GitHubConfig } from './github.config.ts';
 export { ConfigService } from './services/config.service.ts';
+export { githubConfig } from './github.config.ts';
 
 import type { AppConfig } from './app.config.ts';
 import { ConfigService } from "./services/config.service.ts";

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Text, Box, useInput } from 'ink';
 import { GoogleAuthPage } from './google-auth-page.tsx';
+import { GitHubAuthPage } from './github-auth-page.tsx';
 import type { AuthSession } from '../../../auth/interfaces/auth-session.interface.ts';
 
 const options = [
   { text: 'Sign in with Google', enabled: true },
-  { text: 'Sign in with GitHub', enabled: false },
+  { text: 'Sign in with GitHub', enabled: true },
   { text: 'Sign in with Apple', enabled: false },
   { text: 'Exit', enabled: true }
 ];
@@ -17,9 +18,9 @@ export interface AuthPageProps {
 /**
  * Main authentication page that displays login options
  */
-export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }: AuthPageProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [currentPage, setCurrentPage] = useState<'select' | 'google'>('select');
+  const [currentPage, setCurrentPage] = useState<'select' | 'google' | 'github'>('select');
 
   useInput((input, key) => {
     // Only handle input on the select page
@@ -42,6 +43,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       Deno.exit(0);
     } else if (optionText === 'Sign in with Google') {
       setCurrentPage('google');
+    } else if (optionText === 'Sign in with GitHub') {
+      setCurrentPage('github');
     }
   };
 
@@ -66,6 +69,17 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   if (currentPage === 'google') {
     return (
       <GoogleAuthPage
+        onAuthSuccess={handleAuthSuccess}
+        onAuthError={handleAuthError}
+        onCancel={handleAuthCancel}
+      />
+    );
+  }
+
+  // Render GitHub auth page if selected
+  if (currentPage === 'github') {
+    return (
+      <GitHubAuthPage
         onAuthSuccess={handleAuthSuccess}
         onAuthError={handleAuthError}
         onCancel={handleAuthCancel}

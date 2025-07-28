@@ -2,6 +2,7 @@ import { router, publicProcedure } from "./index.ts";
 import { protectedProcedure } from "./middleware/protectedProcedure.ts";
 import { configRouter } from "./routers/config.router.ts";
 import { googleRouter } from "./routers/auth/google.router.ts";
+import { githubRouter } from "./routers/auth/github.router.ts";
 
 export const appRouter = router({
   auth: router({
@@ -10,6 +11,7 @@ export const appRouter = router({
         return ctx.user;
       }),
     google: googleRouter,
+    github: githubRouter,
   }),
   
   config: configRouter,
