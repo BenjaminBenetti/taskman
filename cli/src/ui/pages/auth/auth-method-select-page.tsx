@@ -10,10 +10,14 @@ const options = [
   { text: 'Exit', enabled: true }
 ];
 
+export interface AuthPageProps {
+  onAuthSuccess?: () => void;
+}
+
 /**
  * Main authentication page that displays login options
  */
-export const AuthPage: React.FC = () => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState<'select' | 'google'>('select');
 
@@ -42,8 +46,10 @@ export const AuthPage: React.FC = () => {
   };
 
   const handleAuthSuccess = (_session: AuthSession) => {
-    // Authentication successful - exit and continue to main app
-    Deno.exit(0);
+    // Authentication successful - transition to dashboard
+    if (onAuthSuccess) {
+      onAuthSuccess();
+    }
   };
 
   const handleAuthError = (_error: Error) => {
