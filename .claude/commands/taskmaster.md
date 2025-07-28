@@ -33,5 +33,6 @@ You must follow these steps when implementing a change:
    makes changes to ANY files, then assign the following reviewers in parallel:
    - `code-structure-reviewer`
    - `code-maintainability-reviewer`
-6. Based on the feedback from the reviewers, you may need to:
-   - Reassign the `clean-code-engineer` to make additional changes.
+6. **Assign Clean Code Engineer Subagent to fix issues** 
+   If the `code-structure-reviewer` or `code-maintainability-reviewer` find any
+   issues, assign the `clean-code-engineer` subagent to fix them.

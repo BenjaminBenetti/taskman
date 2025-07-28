@@ -1,7 +1,5 @@
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import type { AuthProvider, TokenPayload } from "../interfaces/auth-provider.interface.ts";
-import type { User } from "@taskman/backend";
-import { prisma } from "../../prisma/index.ts";
 import { config } from "../../config/index.ts";
 
 /**
@@ -62,6 +60,7 @@ export class GoogleAuthProvider implements AuthProvider {
         sub: payload.sub as string,
         iss: payload.iss as string,
         email: payload.email as string | undefined,
+        name: payload.name as string | undefined,
         ...payload
       };
     } catch (error) {
@@ -69,21 +68,6 @@ export class GoogleAuthProvider implements AuthProvider {
     }
   }
   
-  /**
-   * Finds a user in the database based on the token payload
-   * 
-   * @param payload - The verified token payload containing identity information
-   * @returns Promise<User | null> - The user entity if found, null otherwise
-   */
-  async findUserByPayload(payload: TokenPayload): Promise<User | null> {
-    return await prisma.user.findFirst({
-      where: {
-        identityProviderId: payload.sub,
-        identityProvider: this.name,
-        deletedAt: null
-      }
-    });
-  }
   
   /* ========================================
    * Private Methods
