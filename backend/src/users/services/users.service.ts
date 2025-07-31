@@ -127,46 +127,31 @@ export class UsersService {
     }
 
     /* ========================================
-     * Step 1: Create Assignee with Temporary Creator
+     * Create User and Self-Assignee with Raw SQL to Handle Circular Dependency
      * ======================================== */
     
-    // First create the assignee with a temporary creatorId
-    const assigneeData: Prisma.AssigneeCreateInput = {
-      name: name,
-      email: email,
-      isActive: true,
-      tenant: { connect: { id: tenantId } },
-      creator: { connect: { id: crypto.randomUUID() } } // Temporary UUID, will be updated after user creation
-    };
+    // Use raw SQL to insert both records with a single query that handles the circular reference
+    const userId = crypto.randomUUID();
+    const assigneeId = crypto.randomUUID();
     
-    const assignee = await this.assigneesRepository.create(assigneeData, tx);
+    // Insert both user and assignee in a way that handles the circular reference
+    await tx.$executeRaw`
+      WITH user_insert AS (
+        INSERT INTO users (id, email, name, "identityProvider", "identityProviderId", "tenantId", "assigneeId", "createdAt", "updatedAt")
+        VALUES (${userId}, ${email}, ${name}, ${identityProvider}, ${identityProviderId}, ${tenantId}, ${assigneeId}, NOW(), NOW())
+        RETURNING id
+      )
+      INSERT INTO assignees (id, name, email, "isActive", "tenantId", "creatorId", "createdAt", "updatedAt")
+      SELECT ${assigneeId}, ${name}, ${email}, true, ${tenantId}, ${userId}, NOW(), NOW()
+      FROM user_insert;
+    `;
 
-    /* ========================================
-     * Step 2: Create User with Assignee Reference
-     * ======================================== */
+    // Fetch the created user entity
+    const userEntity = await this.usersRepository.getById(userId, tx);
     
-    // Create the user with proper assignee reference
-    const userData: Prisma.UserCreateInput = {
-      email: email,
-      name: name,
-      identityProvider,
-      identityProviderId,
-      tenant: { connect: { id: tenantId } },
-      selfAssignee: { connect: { id: assignee.id } }
-    };
-
-    const userEntity = await this.usersRepository.create(userData, tx);
-
-    /* ========================================
-     * Step 3: Update Assignee with Real User Reference
-     * ======================================== */
-    
-    // Update the assignee's creatorId to point to the actual user
-    const updateData: Prisma.AssigneeUpdateInput = {
-      creator: { connect: { id: userEntity.id } }
-    };
-    
-    await this.assigneesRepository.update(assignee.id, updateData, tx);
+    if (!userEntity) {
+      throw new Error("Failed to create user - user not found after creation");
+    }
 
     return userConverter.toDomain(userEntity);
   }

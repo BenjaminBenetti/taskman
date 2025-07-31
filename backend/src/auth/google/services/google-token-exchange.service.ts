@@ -48,6 +48,7 @@ export class GoogleTokenExchangeService {
     return {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
+      idToken: tokenData.id_token,
       expiresIn: tokenData.expires_in,
       tokenType: tokenData.token_type || 'Bearer',
     };
@@ -84,6 +85,7 @@ export class GoogleTokenExchangeService {
     return {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
+      idToken: tokenData.id_token,
       expiresIn: tokenData.expires_in,
       tokenType: tokenData.token_type || 'Bearer',
     };

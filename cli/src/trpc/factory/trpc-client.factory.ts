@@ -18,12 +18,18 @@ export class TrpcClientFactory {
   static async create(serverUrl?: string): Promise<TRPCClient<TaskmanRouter>> {
     const url = serverUrl || Deno.env.get('TASKMAN_SERVER_URL') || 'https://taskman.bbenetti.ca';
     
-    // Get current auth session for authorization header
+    // Get current auth session and service for backend token selection
     const session = await AuthServiceFactory.getCurrentSession();
+    const authService = await AuthServiceFactory.getCurrentService();
+    
     const headers: Record<string, string> = {};
     
-    if (session?.accessToken) {
-      headers.Authorization = `Bearer ${session.accessToken}`;
+    if (session && authService) {
+      // Use provider-specific backend token (e.g., ID token for Google, access token for GitHub)
+      const backendToken = authService.getBackendToken(session);
+      if (backendToken) {
+        headers.Authorization = `Bearer ${backendToken}`;
+      }
     }
     
     return createTRPCClient<TaskmanRouter>({

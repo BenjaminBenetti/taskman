@@ -1,5 +1,6 @@
 import { AuthSession } from "./auth-session.interface.ts";
 import type { AuthFlowStatusCallback } from "./auth-flow-status.interface.ts";
+import type { BackendTokenProvider } from "./backend-token-provider.interface.ts";
 
 /**
  * Authentication service interface for CLI applications
@@ -7,7 +8,7 @@ import type { AuthFlowStatusCallback } from "./auth-flow-status.interface.ts";
  * This service manages a single user session and provides login capabilities.
  * Since this is a CLI application, there is only ever exactly one session.
  */
-export interface AuthService {
+export interface AuthService extends BackendTokenProvider {
   /**
    * Initiate the login flow for this authentication provider
    * 

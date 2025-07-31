@@ -145,6 +145,19 @@ export class GoogleAuthService extends BaseAuthService {
   }
 
   /**
+   * Get the backend authentication token for Google (ID token)
+   * 
+   * For Google, we use the ID token (JWT) for backend authentication
+   * as it contains the user's identity claims that can be verified.
+   * 
+   * @param session The current authentication session
+   * @returns The ID token if available, otherwise null
+   */
+  getBackendToken(session: AuthSession): string | null {
+    return session.idToken || null;
+  }
+
+  /**
    * Refresh Google OAuth2 tokens
    * 
    * @param refreshToken The refresh token to use for obtaining new tokens
@@ -165,6 +178,7 @@ export class GoogleAuthService extends BaseAuthService {
     return {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken || refreshToken,
+      idToken: tokenData.idToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
@@ -402,6 +416,7 @@ export class GoogleAuthService extends BaseAuthService {
     return {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken,
+      idToken: tokenData.idToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
