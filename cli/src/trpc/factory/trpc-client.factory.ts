@@ -3,7 +3,7 @@ import type { TaskmanRouter } from "@taskman/backend";
 import { AuthServiceFactory } from "../../auth/factories/auth-service.factory.ts";
 
 /**
- * Factory for creating TRPC clients
+ * Factory for creating authenticated TRPC clients
  */
 export class TrpcClientFactory {
   // ================================================
@@ -11,9 +11,9 @@ export class TrpcClientFactory {
   // ================================================
 
   /**
-   * Creates a new TRPC client instance
+   * Creates a new authenticated TRPC client instance
    * @param serverUrl - The server URL to connect to
-   * @returns A configured TRPC client
+   * @returns A configured TRPC client with authentication headers
    */
   static async create(serverUrl?: string): Promise<TRPCClient<TaskmanRouter>> {
     const url = serverUrl || Deno.env.get('TASKMAN_SERVER_URL') || 'https://taskman.bbenetti.ca';

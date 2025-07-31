@@ -6,7 +6,7 @@ import { App } from "./src/ui/app.tsx";
 // Application startup
 // ================================================
 
-async function main() {
+function main() {
   // Render the main app component which handles page state
   render(React.createElement(App));
 }

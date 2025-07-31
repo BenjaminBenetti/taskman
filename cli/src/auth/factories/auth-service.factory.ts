@@ -1,6 +1,6 @@
 import type { AuthService } from "../interfaces/auth-service.interface.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
-import { AuthProvider, toAuthProvider } from "../enums/auth-provider.enum.ts";
+import { AuthProvider } from "../enums/auth-provider.enum.ts";
 import { GoogleAuthService } from "../services/google-auth.service.ts";
 import { config } from "../../config/index.ts";
 import { exists } from "jsr:@std/fs/exists";

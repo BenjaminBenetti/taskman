@@ -2,7 +2,7 @@ import { BaseAuthService } from "./base-auth.service.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import { AuthProvider } from "../enums/auth-provider.enum.ts";
 import type { GoogleClientConfig } from "@taskman/backend";
-import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
+import { PublicTrpcClientFactory } from "../../trpc/factory/public-trpc-client.factory.ts";
 import { OAuthSplashTemplateService } from "../templates/oauth-splash-template.service.ts";
 import { AuthFlowState } from "../enums/auth-flow-state.enum.ts";
 import type { AuthFlowStatus, AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
@@ -40,7 +40,7 @@ export class GoogleAuthService extends BaseAuthService {
    * @returns Promise that resolves when configuration is loaded
    */
   public async initialize(): Promise<void> {
-    const trpcClient = await TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const clientConfig = await trpcClient.config.clientConfig.query();
     this.googleConfig = clientConfig.auth.google;
   }
@@ -156,7 +156,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token refresh
-    const trpcClient = await TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.refreshToken.mutate({
       refreshToken: refreshToken,
     });
@@ -390,7 +390,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token exchange
-    const trpcClient = await TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.exchangeToken.mutate({
       code: code,
       codeVerifier: codeVerifier,
