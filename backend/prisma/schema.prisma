@@ -74,8 +74,8 @@ model Assignee {
   isActive Boolean @default(true)
 
   // Foreign Keys
-  tenantId  String @db.Uuid
-  creatorId String @db.Uuid
+  tenantId  String  @db.Uuid
+  creatorId String? @db.Uuid
 
   // Standard Columns
   createdAt DateTime  @default(now()) @db.Timestamptz()
@@ -84,7 +84,7 @@ model Assignee {
 
   // Relations
   tenant       Tenant        @relation(fields: [tenantId], references: [id])
-  creator      User          @relation("AssigneeCreator", fields: [creatorId], references: [id])
+  creator      User?         @relation("AssigneeCreator", fields: [creatorId], references: [id])
   linkedUser   User?         @relation("UserSelfAssignee")
   tasks        Task[]        @relation("TaskAssignee")
   chatMessages ChatMessage[]

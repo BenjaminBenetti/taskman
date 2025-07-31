@@ -2,6 +2,7 @@ import type { User } from "../models/user.model.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { BaseRepository } from "../../shared/repositories/base.repository.ts";
 import { prisma } from "../../prisma/index.ts";
+import { UserModel } from "../../generated/prisma/models.ts";
 
 /**
  * Users Repository
@@ -11,7 +12,7 @@ import { prisma } from "../../prisma/index.ts";
  * Uses instance-based approach for better dependency injection and testing.
  */
 export class UsersRepository extends BaseRepository<
-  User,
+  UserModel,
   Prisma.UserCreateInput,
   Prisma.UserUpdateInput,
   Prisma.UserDelegate

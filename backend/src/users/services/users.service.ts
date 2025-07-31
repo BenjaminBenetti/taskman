@@ -1,10 +1,10 @@
 import type { User } from "../models/user.model.ts";
 import { UsersRepository } from "../repositories/users.repository.ts";
 import { TenantsService } from "../../tenants/services/tenants.service.ts";
-import { AssigneesRepository } from "../../assignees/repositories/assignees.repository.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../prisma/index.ts";
 import { userConverter } from "../converters/user.converter.ts";
+import { AssigneesRepository } from "../../assignees/repositories/assignees.repository.ts";
 
 /**
  * Users Service
@@ -112,46 +112,43 @@ export class UsersService {
     tenantId: string,
     tx?: Prisma.TransactionClient
   ): Promise<User> {
-    // If no transaction provided, wrap in a new transaction
-    if (!tx) {
-      return await prisma.$transaction(async (transaction) => {
-        return await this._createUserWithSelfAssignee(
-          name,
-          email,
-          identityProvider,
-          identityProviderId,
-          tenantId,
-          transaction
-        );
-      });
-    }
-
     /* ========================================
-     * Create User and Self-Assignee with Raw SQL to Handle Circular Dependency
+     * Create User with Nested Self-Assignee Creation
      * ======================================== */
     
-    // Use raw SQL to insert both records with a single query that handles the circular reference
+    // Generate UUIDs for both entities to handle circular dependency
     const userId = crypto.randomUUID();
     const assigneeId = crypto.randomUUID();
     
-    // Insert both user and assignee in a way that handles the circular reference
-    await tx.$executeRaw`
-      WITH user_insert AS (
-        INSERT INTO users (id, email, name, "identityProvider", "identityProviderId", "tenantId", "assigneeId", "createdAt", "updatedAt")
-        VALUES (${userId}, ${email}, ${name}, ${identityProvider}, ${identityProviderId}, ${tenantId}, ${assigneeId}, NOW(), NOW())
-        RETURNING id
-      )
-      INSERT INTO assignees (id, name, email, "isActive", "tenantId", "creatorId", "createdAt", "updatedAt")
-      SELECT ${assigneeId}, ${name}, ${email}, true, ${tenantId}, ${userId}, NOW(), NOW()
-      FROM user_insert;
-    `;
+    // Create user with nested self-assignee
+    const userData: Prisma.UserCreateInput = {
+      id: userId,
+      email: email,
+      name: name,
+      identityProvider,
+      identityProviderId,
+      tenant: { connect: { id: tenantId } },
+      selfAssignee: {
+        create: {
+          id: assigneeId,
+          name: name,
+          email: email,
+          isActive: true,
+          tenant: { connect: { id: tenantId } },
+        }
+      }
+    };
 
-    // Fetch the created user entity
-    const userEntity = await this.usersRepository.getById(userId, tx);
-    
-    if (!userEntity) {
-      throw new Error("Failed to create user - user not found after creation");
-    }
+    const userEntity = await this.usersRepository.create(userData, tx);
+
+    /* ========================================
+     * Create Self-Assignee with Circular Reference
+     * ======================================== */
+    const assigneeData: Prisma.AssigneeUpdateInput = {
+      creator: { connect: { id: userEntity.id } },
+    };
+
+    await this.assigneesRepository.update(userEntity.assigneeId, assigneeData, tx);
 
     return userConverter.toDomain(userEntity);
   }

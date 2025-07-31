@@ -29,5 +29,15 @@ export class AssigneesRepository extends BaseRepository<
    * Query Methods
    * ======================================== */
 
-  // Add assignee-specific methods here as needed
+  /**
+   * Find the first assignee created by a specific user
+   */
+  async findByCreatorId(creatorId: string, tx?: Prisma.TransactionClient): Promise<Assignee | null> {
+    return await this.getDelegate(tx).findFirst({
+      where: {
+        creatorId,
+        deletedAt: null
+      }
+    });
+  }
 }
