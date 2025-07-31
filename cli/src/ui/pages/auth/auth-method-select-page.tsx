@@ -17,7 +17,7 @@ export interface AuthPageProps {
 /**
  * Main authentication page that displays login options
  */
-export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }: AuthPageProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState<'select' | 'google'>('select');
 

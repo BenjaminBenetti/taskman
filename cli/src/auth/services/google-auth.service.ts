@@ -40,7 +40,7 @@ export class GoogleAuthService extends BaseAuthService {
    * @returns Promise that resolves when configuration is loaded
    */
   public async initialize(): Promise<void> {
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = await TrpcClientFactory.create();
     const clientConfig = await trpcClient.config.clientConfig.query();
     this.googleConfig = clientConfig.auth.google;
   }
@@ -156,7 +156,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token refresh
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = await TrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.refreshToken.mutate({
       refreshToken: refreshToken,
     });
@@ -390,7 +390,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token exchange
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = await TrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.exchangeToken.mutate({
       code: code,
       codeVerifier: codeVerifier,

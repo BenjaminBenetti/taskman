@@ -10,15 +10,7 @@ export class ConfigService {
   // Properties
   // ================================================
   
-  private client: TRPCClient<TaskmanRouter>;
-
-  // ================================================
-  // Constructor
-  // ================================================
-
-  constructor() {
-    this.client = TrpcClientFactory.create();
-  }
+  private client?: TRPCClient<TaskmanRouter>;
 
   // ================================================
   // Public methods
@@ -28,6 +20,9 @@ export class ConfigService {
    * Loads client configuration from server. and updates global config object.
    */
   async load(): Promise<ClientConfig> {
+    if (!this.client) {
+      this.client = await TrpcClientFactory.create();
+    } 
     // Fetch remote client config
     return await this.client.config.clientConfig.query();
   }
