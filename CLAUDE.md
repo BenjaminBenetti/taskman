@@ -73,3 +73,7 @@ Uses Prisma ORM with PostgreSQL:
 
 The project is designed to run in a DevContainer with Docker Compose managing
 the PostgreSQL database and backend services.
+
+## TypeScript Validation Philosophy
+
+Avoid creating runtime validation utilities for basic type checking (like validating if something is an array or checking for null/undefined). TypeScript's type system provides compile-time safety that makes such runtime validation redundant and adds unnecessary complexity. Trust TypeScript's type system - if a method parameter is typed as `T[]`, it will be an array at runtime. Focus validation efforts on business logic validation rather than type validation that TypeScript already handles.
