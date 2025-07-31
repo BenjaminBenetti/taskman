@@ -2,6 +2,7 @@ import type { User } from "../../users/models/user.model.ts";
 import type { TokenPayload } from "../interfaces/auth-provider.interface.ts";
 import { UsersRepository } from "../../users/repositories/users.repository.ts";
 import { UsersService } from "../../users/services/users.service.ts";
+import { userConverter } from "../../users/converters/user.converter.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 
 /**
@@ -33,10 +34,12 @@ export class AuthService {
     payload: TokenPayload,
     identityProvider: string
   ): Promise<User> {
-    const existingUser = await this.usersRepository.findByIdentityProvider(
+    const existingUserEntity = await this.usersRepository.findByIdentityProvider(
       identityProvider,
       payload.sub
     );
+    
+    const existingUser = existingUserEntity ? userConverter.toDomain(existingUserEntity) : null;
 
     if (existingUser) {
       /* ========================================
@@ -66,7 +69,8 @@ export class AuthService {
       name: payload.name as string | undefined
     };
 
-    return await this.usersRepository.update(userId, updateData);
+    const updatedUserEntity = await this.usersRepository.update(userId, updateData);
+    return userConverter.toDomain(updatedUserEntity);
   }
 
   /**

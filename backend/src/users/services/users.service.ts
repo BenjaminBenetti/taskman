@@ -4,6 +4,7 @@ import { TenantsService } from "../../tenants/services/tenants.service.ts";
 import { AssigneesRepository } from "../../assignees/repositories/assignees.repository.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../prisma/index.ts";
+import { userConverter } from "../converters/user.converter.ts";
 
 /**
  * Users Service
@@ -30,21 +31,24 @@ export class UsersService {
     identityProvider: string,
     identityProviderId: string
   ): Promise<User | null> {
-    return await this.usersRepository.findByIdentityProvider(identityProvider, identityProviderId);
+    const userEntity = await this.usersRepository.findByIdentityProvider(identityProvider, identityProviderId);
+    return userEntity ? userConverter.toDomain(userEntity) : null;
   }
 
   /**
    * Update user with provided data
    */
   async updateUser(userId: string, updateData: Prisma.UserUpdateInput): Promise<User> {
-    return await this.usersRepository.update(userId, updateData);
+    const userEntity = await this.usersRepository.update(userId, updateData);
+    return userConverter.toDomain(userEntity);
   }
 
   /**
    * Get user by ID
    */
   async getUserById(userId: string): Promise<User | null> {
-    return await this.usersRepository.getById(userId);
+    const userEntity = await this.usersRepository.getById(userId);
+    return userEntity ? userConverter.toDomain(userEntity) : null;
   }
 
   /**
@@ -151,7 +155,7 @@ export class UsersService {
       selfAssignee: { connect: { id: assignee.id } }
     };
 
-    const user = await this.usersRepository.create(userData, tx);
+    const userEntity = await this.usersRepository.create(userData, tx);
 
     /* ========================================
      * Step 3: Update Assignee with Real User Reference
@@ -159,11 +163,11 @@ export class UsersService {
     
     // Update the assignee's creatorId to point to the actual user
     const updateData: Prisma.AssigneeUpdateInput = {
-      creator: { connect: { id: user.id } }
+      creator: { connect: { id: userEntity.id } }
     };
     
     await this.assigneesRepository.update(assignee.id, updateData, tx);
 
-    return user;
+    return userConverter.toDomain(userEntity);
   }
 }

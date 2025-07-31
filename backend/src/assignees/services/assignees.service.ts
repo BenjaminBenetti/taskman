@@ -1,5 +1,6 @@
 import type { Assignee } from "../models/assignee.model.ts";
 import { AssigneesRepository } from "../repositories/assignees.repository.ts";
+import { assigneeConverter } from "../converters/assignee.converter.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 
 /**

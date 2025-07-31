@@ -7,12 +7,12 @@
 export interface User {
   id: string;
   email: string;
-  name?: string | null;
+  name: string | null;
   identityProvider: string;
   identityProviderId: string;
   tenantId: string;
   assigneeId: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
+  deletedAt: Date | null;
 }

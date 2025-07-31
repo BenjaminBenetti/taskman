@@ -1,6 +1,6 @@
 import { AbstractConverter } from '../../shared/converters/abstract.converter.ts';
 import { User } from '../models/user.model.ts';
-import { UserModel } from '../../generated/prisma/models/User.ts';
+import type { User as PrismaUser } from '../../generated/prisma/client.ts';
 
 /**
  * User Converter
@@ -16,7 +16,7 @@ import { UserModel } from '../../generated/prisma/models/User.ts';
  * - Manage Date object conversions for timestamp fields
  * - Provide batch conversion capabilities for arrays
  */
-export class UserConverter extends AbstractConverter<User, UserModel> {
+export class UserConverter extends AbstractConverter<User, PrismaUser> {
 
   /* ========================================
    * Single Entity Conversion
@@ -40,12 +40,12 @@ export class UserConverter extends AbstractConverter<User, UserModel> {
    * console.log(userDomain.email); // Access clean domain properties
    * ```
    */
-  toDomain(prismaEntity: UserModel): User {
+  toDomain(prismaEntity: PrismaUser): User {
 
     return {
       id: prismaEntity.id,
       email: prismaEntity.email,
-      name: prismaEntity.name,
+      name: prismaEntity.name ?? null,
       identityProvider: prismaEntity.identityProvider,
       identityProviderId: prismaEntity.identityProviderId,
       tenantId: prismaEntity.tenantId,
@@ -78,18 +78,18 @@ export class UserConverter extends AbstractConverter<User, UserModel> {
    * await prisma.user.create({ data: prismaData });
    * ```
    */
-  toPrisma(domainModel: User): UserModel {
+  toPrisma(domainModel: User): PrismaUser {
     return {
       id: domainModel.id,
       email: domainModel.email,
-      name: domainModel.name ?? null,
+      name: domainModel.name,
       identityProvider: domainModel.identityProvider,
       identityProviderId: domainModel.identityProviderId,
       tenantId: domainModel.tenantId,
       assigneeId: domainModel.assigneeId,
       createdAt: domainModel.createdAt,
       updatedAt: domainModel.updatedAt,
-      deletedAt: domainModel.deletedAt ?? null,
+      deletedAt: domainModel.deletedAt,
     };
   }
 

@@ -7,8 +7,8 @@
 export interface Tenant {
   id: string;
   name: string;
-  description?: string | null;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
+  deletedAt: Date | null;
 }

@@ -1,5 +1,6 @@
 import type { Tenant } from "../models/tenant.model.ts";
 import { TenantsRepository } from "../repositories/tenants.repository.ts";
+import { tenantConverter } from "../converters/tenant.converter.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 
 /**
@@ -27,7 +28,8 @@ export class TenantsService {
       description: `Personal workspace for ${userEmail}`
     };
 
-    return await this.tenantsRepository.create(tenantData, tx);
+    const createdTenant = await this.tenantsRepository.create(tenantData, tx);
+    return tenantConverter.toDomain(createdTenant);
   }
 
   /* ========================================
