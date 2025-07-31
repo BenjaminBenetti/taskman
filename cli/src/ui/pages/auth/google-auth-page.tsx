@@ -8,6 +8,7 @@ import { AuthFlowState } from '../../../auth/enums/auth-flow-state.enum.ts';
 import type { AuthFlowStatus } from '../../../auth/interfaces/auth-flow-status.interface.ts';
 import type { AuthSession } from '../../../auth/interfaces/auth-session.interface.ts';
 import type { GoogleAuthService } from "../../../auth/services/google-auth.service.ts";
+import { TrpcClientFactory } from '../../../trpc/factory/trpc-client.factory.ts';
 
 interface GoogleAuthPageProps {
   /** Callback when authentication is successful */
@@ -60,12 +61,21 @@ export const GoogleAuthPage: React.FC<GoogleAuthPageProps> = ({
         // Start the authentication flow with status updates
         const session = await performLoginWithStatusUpdates(authService);
 
+        // Update status to show user creation/update
+        setAuthStatus({
+          state: AuthFlowState.ProcessingToken,
+          message: 'Creating user account...'
+        });
+
+        // Call the me endpoint to create/update user in database
+        const trpcClient = await TrpcClientFactory.create();
+        const user = await trpcClient.auth.me.query();
+
         // Update status to show success
         setAuthStatus({
           state: AuthFlowState.Success,
           message: `Welcome, ${session.name || session.email}!`
         });
-
 
         onAuthSuccess?.(session);
 
