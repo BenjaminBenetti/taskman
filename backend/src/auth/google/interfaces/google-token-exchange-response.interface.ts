@@ -6,6 +6,8 @@ export interface GoogleTokenExchangeResponse {
   accessToken: string;
   /** Refresh token for obtaining new access tokens */
   refreshToken?: string;
+  /** ID token (JWT) containing user identity claims */
+  idToken?: string;
   /** Token expiration time in seconds */
   expiresIn?: number;
   /** Token type (usually 'Bearer') */

@@ -13,6 +13,9 @@ export interface AuthSession {
   /** The refresh token for obtaining new access tokens */
   readonly refreshToken?: string;
   
+  /** The ID token (JWT) for backend authentication - provider specific */
+  readonly idToken?: string;
+  
   /** When the access token expires (Unix timestamp) */
   readonly expiresAt?: number;
   

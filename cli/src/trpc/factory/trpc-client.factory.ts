@@ -1,8 +1,9 @@
 import { createTRPCClient, httpBatchLink, type TRPCClient } from "@trpc/client";
 import type { TaskmanRouter } from "@taskman/backend";
+import { AuthServiceFactory } from "../../auth/factories/auth-service.factory.ts";
 
 /**
- * Factory for creating TRPC clients
+ * Factory for creating authenticated TRPC clients
  */
 export class TrpcClientFactory {
   // ================================================
@@ -10,17 +11,32 @@ export class TrpcClientFactory {
   // ================================================
 
   /**
-   * Creates a new TRPC client instance
+   * Creates a new authenticated TRPC client instance
    * @param serverUrl - The server URL to connect to
-   * @returns A configured TRPC client
+   * @returns A configured TRPC client with authentication headers
    */
-  static create(serverUrl?: string): TRPCClient<TaskmanRouter> {
+  static async create(serverUrl?: string): Promise<TRPCClient<TaskmanRouter>> {
     const url = serverUrl || Deno.env.get('TASKMAN_SERVER_URL') || 'https://taskman.bbenetti.ca';
+    
+    // Get current auth session and service for backend token selection
+    const session = await AuthServiceFactory.getCurrentSession();
+    const authService = await AuthServiceFactory.getCurrentService();
+    
+    const headers: Record<string, string> = {};
+    
+    if (session && authService) {
+      // Use provider-specific backend token (e.g., ID token for Google, access token for GitHub)
+      const backendToken = authService.getBackendToken(session);
+      if (backendToken) {
+        headers.Authorization = `Bearer ${backendToken}`;
+      }
+    }
     
     return createTRPCClient<TaskmanRouter>({
       links: [
         httpBatchLink({
           url,
+          headers,
         }),
       ],
     });

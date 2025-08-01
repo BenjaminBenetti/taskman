@@ -1,6 +1,7 @@
 import type { AuthService } from "../interfaces/auth-service.interface.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import type { AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
+import type { BackendTokenProvider } from "../interfaces/backend-token-provider.interface.ts";
 import { config } from "../../config/index.ts";
 
 /**
@@ -10,7 +11,7 @@ import { config } from "../../config/index.ts";
  * It provides persistence and basic session management while delegating
  * provider-specific login logic to concrete implementations.
  */
-export abstract class BaseAuthService implements AuthService {
+export abstract class BaseAuthService implements AuthService, BackendTokenProvider {
   private session: AuthSession | null = null;
 
   // ================================================
@@ -39,6 +40,14 @@ export abstract class BaseAuthService implements AuthService {
    * @returns Promise that resolves to the new authentication session
    */
   protected abstract performRefresh(refreshToken: string): Promise<AuthSession>;
+
+  /**
+   * Abstract method for determining which token to send to the backend
+   * 
+   * @param session The current authentication session
+   * @returns The token to use for backend authentication, or null if none available
+   */
+  abstract getBackendToken(session: AuthSession): string | null;
 
   // ================================================
   // Public Methods

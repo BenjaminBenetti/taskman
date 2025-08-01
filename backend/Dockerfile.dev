@@ -19,5 +19,5 @@ RUN deno cache main.ts
 # Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["deno", "task", "dev"]
+# Run migrations and start the application
+CMD ["sh", "-c", "deno run -A npm:prisma@latest migrate deploy && deno task dev"]

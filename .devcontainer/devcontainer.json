@@ -33,7 +33,7 @@
 		}
 	},
 	// Use 'postStartCommand' to run commands each time the container starts.
-	"postCreateCommand": "./.devcontainer/post-create.sh"
+	"postStartCommand": "./.devcontainer/post-create.sh"
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }

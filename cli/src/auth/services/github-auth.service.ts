@@ -1,11 +1,11 @@
 import { BaseAuthService } from "./base-auth.service.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import { AuthProvider } from "../enums/auth-provider.enum.ts";
-import type { GitHubClientConfig } from "@taskman/backend";
-import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
+import type { GitHubClientConfig } from "@taskman/backend"
 import { OAuthSplashTemplateService } from "../templates/oauth-splash-template.service.ts";
 import { AuthFlowState } from "../enums/auth-flow-state.enum.ts";
 import type { AuthFlowStatus, AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
+import { PublicTrpcClientFactory } from "../../trpc/factory/public-trpc-client.factory.ts";
 
 /**
  * GitHub OAuth2 authentication service for CLI applications
@@ -52,7 +52,7 @@ export class GitHubAuthService extends BaseAuthService {
    * @returns Promise that resolves when configuration is loaded
    */
   public async initialize(): Promise<void> {
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const clientConfig = await trpcClient.config.clientConfig.query();
     this.githubConfig = clientConfig.auth.github;
   }
@@ -157,6 +157,15 @@ export class GitHubAuthService extends BaseAuthService {
         // Token revocation failed - this is not critical for logout
       }
     }
+  }
+
+  /**
+   * GitHub Auth uses access token.
+   * @param session - The current authentication session
+   * @returns - The access token for the backend
+   */
+  public override getBackendToken(session: AuthSession): string | null {
+    return session.accessToken;
   }
 
   /**
@@ -408,7 +417,7 @@ export class GitHubAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token exchange
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const tokenData = await trpcClient.auth.github.exchangeToken.mutate({
       code: code,
       codeVerifier: codeVerifier,

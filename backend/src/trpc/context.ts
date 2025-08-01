@@ -1,5 +1,6 @@
-import type { User } from "@taskman/backend";
+import type { User } from "../users/models/user.model.ts";
 import { AuthProviderFactory } from "../auth/factories/auth-provider.factory.ts";
+import { AuthService } from "../auth/services/auth.service.ts";
 import type { IncomingMessage } from "node:http";
 
 /**
@@ -9,6 +10,7 @@ import type { IncomingMessage } from "node:http";
  */
 export interface Context {
   user: User | null;
+  req: IncomingMessage;
 }
 
 /**
@@ -42,7 +44,7 @@ export async function createTRPCContext(req: IncomingMessage): Promise<Context> 
     }
   }
 
-  return { user };
+  return { user, req };
 }
 
 /* ========================================
@@ -52,6 +54,10 @@ export async function createTRPCContext(req: IncomingMessage): Promise<Context> 
 /**
  * Authenticates a user based on the provided JWT token
  * 
+ * If user doesn't exist, creates them with info from identity provider.
+ * If user exists, updates them with latest info from identity provider.
+ * Handles tenant and assignee creation for new users.
+ * 
  * @param token - The JWT token to authenticate
  * @returns Promise<User | null> - The authenticated user or null if authentication fails
  * @throws Error if authentication process fails
@@ -60,7 +66,13 @@ async function _authenticateUser(token: string): Promise<User | null> {
   // For now, default to Google provider
   // TODO: Determine provider from token or other means
   const provider = AuthProviderFactory.create("google");
+  const authService = new AuthService();
   
   const payload = await provider.verifyToken(token);
-  return await provider.findUserByPayload(payload);
+  
+  // Context should only find existing users, not create them
+  // User creation happens during initial auth flow, not on every request
+  const user = await authService.findExistingUserFromToken(payload, provider.name);
+
+  return user;
 }

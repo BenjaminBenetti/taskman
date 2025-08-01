@@ -60,12 +60,17 @@ export const GoogleAuthPage: React.FC<GoogleAuthPageProps> = ({
         // Start the authentication flow with status updates
         const session = await performLoginWithStatusUpdates(authService);
 
+        // Update status to show user creation/update
+        setAuthStatus({
+          state: AuthFlowState.ProcessingToken,
+          message: 'Creating user account...'
+        });
+
         // Update status to show success
         setAuthStatus({
           state: AuthFlowState.Success,
           message: `Welcome, ${session.name || session.email}!`
         });
-
 
         onAuthSuccess?.(session);
 

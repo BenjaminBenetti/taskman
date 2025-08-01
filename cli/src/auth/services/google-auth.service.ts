@@ -2,7 +2,7 @@ import { BaseAuthService } from "./base-auth.service.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import { AuthProvider } from "../enums/auth-provider.enum.ts";
 import type { GoogleClientConfig } from "@taskman/backend";
-import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
+import { PublicTrpcClientFactory } from "../../trpc/factory/public-trpc-client.factory.ts";
 import { OAuthSplashTemplateService } from "../templates/oauth-splash-template.service.ts";
 import { AuthFlowState } from "../enums/auth-flow-state.enum.ts";
 import type { AuthFlowStatus, AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
@@ -40,7 +40,7 @@ export class GoogleAuthService extends BaseAuthService {
    * @returns Promise that resolves when configuration is loaded
    */
   public async initialize(): Promise<void> {
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const clientConfig = await trpcClient.config.clientConfig.query();
     this.googleConfig = clientConfig.auth.google;
   }
@@ -145,6 +145,19 @@ export class GoogleAuthService extends BaseAuthService {
   }
 
   /**
+   * Get the backend authentication token for Google (ID token)
+   * 
+   * For Google, we use the ID token (JWT) for backend authentication
+   * as it contains the user's identity claims that can be verified.
+   * 
+   * @param session The current authentication session
+   * @returns The ID token if available, otherwise null
+   */
+  getBackendToken(session: AuthSession): string | null {
+    return session.idToken || null;
+  }
+
+  /**
    * Refresh Google OAuth2 tokens
    * 
    * @param refreshToken The refresh token to use for obtaining new tokens
@@ -156,7 +169,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token refresh
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.refreshToken.mutate({
       refreshToken: refreshToken,
     });
@@ -165,6 +178,7 @@ export class GoogleAuthService extends BaseAuthService {
     return {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken || refreshToken,
+      idToken: tokenData.idToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
@@ -390,7 +404,7 @@ export class GoogleAuthService extends BaseAuthService {
     }
 
     // Use backend endpoint for secure token exchange
-    const trpcClient = TrpcClientFactory.create();
+    const trpcClient = PublicTrpcClientFactory.create();
     const tokenData = await trpcClient.auth.google.exchangeToken.mutate({
       code: code,
       codeVerifier: codeVerifier,
@@ -402,6 +416,7 @@ export class GoogleAuthService extends BaseAuthService {
     return {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken,
+      idToken: tokenData.idToken,
       provider: AuthProvider.Google,
       providerUserId: userInfo.sub,
       email: userInfo.email,
