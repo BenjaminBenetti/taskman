@@ -77,6 +77,7 @@ export class AuthService {
     return existingUserEntity ? userConverter.toDomain(existingUserEntity) : null;
   }
 
+
   /* ========================================
    * Private Methods
    * ======================================== */

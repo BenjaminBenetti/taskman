@@ -2,12 +2,14 @@ import { router, publicProcedure } from "./index.ts";
 import { configRouter } from "./routers/config.router.ts";
 import { googleRouter } from "./routers/auth/google.router.ts";
 import { githubRouter } from "./routers/auth/github.router.ts";
+import { internalRouter } from "./routers/auth/internal.router.ts";
 import { userRouter } from "./routers/users/user.router.ts";
 
 export const appRouter = router({
   auth: router({
     google: googleRouter,
     github: githubRouter,
+    internal: internalRouter,
   }),
   users: userRouter,
   config: configRouter,
