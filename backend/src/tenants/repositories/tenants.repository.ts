@@ -1,7 +1,7 @@
-import type { Tenant } from "../models/tenant.model.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { BaseRepository } from "../../shared/repositories/base.repository.ts";
 import { prisma } from "../../prisma/index.ts";
+import { TenantModel } from "../../generated/prisma/models.ts";
 
 /**
  * Tenants Repository
@@ -11,7 +11,7 @@ import { prisma } from "../../prisma/index.ts";
  * Uses instance-based approach for better dependency injection and testing.
  */
 export class TenantsRepository extends BaseRepository<
-  Tenant,
+  TenantModel,
   Prisma.TenantCreateInput,
   Prisma.TenantUpdateInput,
   Prisma.TenantDelegate

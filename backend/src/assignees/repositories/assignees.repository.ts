@@ -1,7 +1,7 @@
-import type { Assignee } from "../models/assignee.model.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { BaseRepository } from "../../shared/repositories/base.repository.ts";
 import { prisma } from "../../prisma/index.ts";
+import { AssigneeModel } from "../../generated/prisma/models.ts";
 
 /**
  * Assignees Repository
@@ -11,7 +11,7 @@ import { prisma } from "../../prisma/index.ts";
  * Uses instance-based approach for better dependency injection and testing.
  */
 export class AssigneesRepository extends BaseRepository<
-  Assignee,
+  AssigneeModel,
   Prisma.AssigneeCreateInput,
   Prisma.AssigneeUpdateInput,
   Prisma.AssigneeDelegate
@@ -32,7 +32,7 @@ export class AssigneesRepository extends BaseRepository<
   /**
    * Find the first assignee created by a specific user
    */
-  async findByCreatorId(creatorId: string, tx?: Prisma.TransactionClient): Promise<Assignee | null> {
+  async findByCreatorId(creatorId: string, tx?: Prisma.TransactionClient): Promise<AssigneeModel | null> {
     return await this.getDelegate(tx).findFirst({
       where: {
         creatorId,

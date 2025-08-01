@@ -1,5 +1,6 @@
 import type { TokenExchangeResult } from "../interfaces/token-exchange-result.interface.ts";
 import type { User } from "../../users/models/user.model.ts";
+import type { ExternalAuthProvider } from "../types/auth-provider.type.ts";
 import { AuthProviderFactory } from "../factories/auth-provider.factory.ts";
 import { AuthService } from "./auth.service.ts";
 import { JWTService } from "./jwt.service.ts";
@@ -31,13 +32,13 @@ export class InternalTokenExchangeService {
    * internal JWT token for the authenticated session.
    * 
    * @param providerToken - The access token from the external provider
-   * @param provider - The provider type ("google" | "github")
+   * @param provider - The external authentication provider type
    * @returns Promise<TokenExchangeResult> - The internal token and expiration info
    * @throws Error if token validation fails or user creation fails
    */
   async exchangeToken(
     providerToken: string,
-    provider: "google" | "github"
+    provider: ExternalAuthProvider
   ): Promise<TokenExchangeResult> {
     try {
       // Validate the external provider token
@@ -73,7 +74,7 @@ export class InternalTokenExchangeService {
    * @returns Promise<TokenPayload> - The validated token payload
    * @throws Error if token validation fails
    */
-  private async _validateExternalToken(token: string, provider: "google" | "github") {
+  private async _validateExternalToken(token: string, provider: ExternalAuthProvider) {
     const authProvider = AuthProviderFactory.create(provider);
     return await authProvider.verifyToken(token);
   }

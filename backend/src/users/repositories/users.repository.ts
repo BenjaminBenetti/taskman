@@ -1,4 +1,3 @@
-import type { User } from "../models/user.model.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 import { BaseRepository } from "../../shared/repositories/base.repository.ts";
 import { prisma } from "../../prisma/index.ts";
@@ -37,7 +36,7 @@ export class UsersRepository extends BaseRepository<
     identityProvider: string,
     identityProviderId: string,
     tx?: Prisma.TransactionClient
-  ): Promise<User | null> {
+  ): Promise<UserModel | null> {
     return await this.getDelegate(tx).findFirst({
       where: {
         identityProvider,

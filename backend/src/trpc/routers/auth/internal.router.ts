@@ -1,13 +1,20 @@
 import { z } from "zod";
 import { router, publicProcedure } from "../../index.ts";
 import { InternalTokenExchangeService } from "../../../auth/services/internal-token-exchange.service.ts";
+import type { ExternalAuthProvider } from "../../../auth/types/auth-provider.type.ts";
+
+/**
+ * Zod schema for external auth provider validation
+ * Derived from the centralized ExternalAuthProvider type
+ */
+const externalAuthProviderSchema = z.enum(["google", "github"]) satisfies z.ZodType<ExternalAuthProvider>;
 
 /**
  * Input validation schema for external token exchange
  */
 const externalTokenExchangeInput = z.object({
   providerToken: z.string().min(1, "Provider token is required"),
-  provider: z.enum(["google", "github"]),
+  provider: externalAuthProviderSchema,
 });
 
 /**
