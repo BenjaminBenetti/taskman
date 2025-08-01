@@ -1,6 +1,7 @@
 import type { AuthProvider } from "../interfaces/auth-provider.interface.ts";
 import { GoogleAuthProvider } from "../providers/google-auth.provider.ts";
 import { GitHubAuthProvider } from "../providers/github-auth.provider.ts";
+import { InternalAuthProvider } from "../providers/internal-auth.provider.ts";
 
 /**
  * Authentication Provider Factory
@@ -17,6 +18,7 @@ export class AuthProviderFactory {
   private static readonly _providers = new Map<string, () => AuthProvider>([
     ["google", () => new GoogleAuthProvider()],
     ["github", () => new GitHubAuthProvider()],
+    ["internal", () => new InternalAuthProvider()],
   ]);
   
   /* ========================================
@@ -30,7 +32,7 @@ export class AuthProviderFactory {
    * @returns AuthProvider - The appropriate auth provider instance
    * @throws Error if the provider is not supported
    */
-  static create(providerName: "google" | "github"): AuthProvider {
+  static create(providerName: "google" | "github" | "internal"): AuthProvider {
     const providerFactory = this._providers.get(providerName.toLowerCase());
     
     if (!providerFactory) {
