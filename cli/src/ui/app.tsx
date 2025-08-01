@@ -38,11 +38,11 @@ export const App: React.FC = () => {
     checkAuth();
   }, [goToDashboard, goToAuth]);
 
-  // Call the auth me endpoint to ensure the user is created and 
+  // Call the users me endpoint to ensure the user is created and 
   // transition to the dashboard page.
   const toDashboardWithAuth = async () => {
     const trpcClient = await TrpcClientFactory.create();
-    await trpcClient.auth.me.query();
+    await trpcClient.users.me.query();
     goToDashboard();
   };
 

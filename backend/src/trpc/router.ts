@@ -1,19 +1,20 @@
 import { router, publicProcedure } from "./index.ts";
-import { protectedProcedure } from "./middleware/protectedProcedure.ts";
 import { configRouter } from "./routers/config.router.ts";
 import { googleRouter } from "./routers/auth/google.router.ts";
+import { userRouter } from "./routers/users/user.router.ts";
 
 export const appRouter = router({
   auth: router({
-    me: protectedProcedure
-      .query(({ ctx }) => {
-        return ctx.user;
-      }),
     google: googleRouter,
-  }),
-  
+  }),  
+  users: userRouter,
   config: configRouter,
-  
+
+  /**
+   * Health check endpoint
+   * 
+   * Returns a simple status message to verify the service is running.
+   */
   health: publicProcedure
     .query(() => {
       return { status: "ok", timestamp: new Date().toISOString() };

@@ -56,6 +56,27 @@ export class AuthService {
     }
   }
 
+  /**
+   * Find an existing user from a verified token payload (does not create)
+   * 
+   * Used by TRPC context to authenticate existing users without creating duplicates.
+   * 
+   * @param payload - The verified token payload containing user information
+   * @param identityProvider - The name of the identity provider (e.g., "google")
+   * @returns Promise<User | null> - The existing user or null if not found
+   */
+  async findExistingUserFromToken(
+    payload: TokenPayload,
+    identityProvider: string
+  ): Promise<User | null> {
+    const existingUserEntity = await this.usersRepository.findByIdentityProvider(
+      identityProvider,
+      payload.sub
+    );
+    
+    return existingUserEntity ? userConverter.toDomain(existingUserEntity) : null;
+  }
+
   /* ========================================
    * Private Methods
    * ======================================== */

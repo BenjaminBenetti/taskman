@@ -10,6 +10,7 @@ import type { IncomingMessage } from "node:http";
  */
 export interface Context {
   user: User | null;
+  req: IncomingMessage;
 }
 
 /**
@@ -43,7 +44,7 @@ export async function createTRPCContext(req: IncomingMessage): Promise<Context> 
     }
   }
 
-  return { user };
+  return { user, req };
 }
 
 /* ========================================
@@ -68,7 +69,10 @@ async function _authenticateUser(token: string): Promise<User | null> {
   const authService = new AuthService();
   
   const payload = await provider.verifyToken(token);
-  const user = await authService.createOrUpdateUserFromToken(payload, provider.name);
+  
+  // Context should only find existing users, not create them
+  // User creation happens during initial auth flow, not on every request
+  const user = await authService.findExistingUserFromToken(payload, provider.name);
 
   return user;
 }
