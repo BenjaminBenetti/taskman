@@ -1,5 +1,5 @@
 import { jwtVerify, createRemoteJWKSet } from "jose";
-import type { AuthProvider, TokenPayload } from "../interfaces/auth-provider.interface.ts";
+import type { AuthProvider, TokenPayload, UserInfo } from "../interfaces/auth-provider.interface.ts";
 import { config } from "../../config/index.ts";
 
 /**
@@ -66,6 +66,26 @@ export class GoogleAuthProvider implements AuthProvider {
     } catch (error) {
       throw new Error(`Token verification failed: ${(error as Error).message}`);
     }
+  }
+  
+  /**
+   * Gets user information from Google JWT token
+   * 
+   * @param token - The Google JWT token string
+   * @returns Promise<UserInfo> - User information with guaranteed email
+   * @throws Error if token verification fails or email is not available
+   */
+  async getUserInfoFromToken(token: string): Promise<UserInfo> {
+    const payload = await this.verifyToken(token);
+    
+    if (!payload.email) {
+      throw new Error("Email is required but not found in Google token payload");
+    }
+    
+    return {
+      email: payload.email,
+      name: payload.name,
+    };
   }
   
   

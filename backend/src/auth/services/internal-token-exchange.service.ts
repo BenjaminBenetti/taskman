@@ -41,11 +41,11 @@ export class InternalTokenExchangeService {
     provider: ExternalAuthProvider
   ): Promise<TokenExchangeResult> {
     try {
-      // Validate the external provider token
-      const tokenPayload = await this._validateExternalToken(providerToken, provider);
+      // Validate the external provider token (still needed for token validation)
+      await this._validateExternalToken(providerToken, provider);
       
-      // Create or update user from the validated token
-      const user = await this.authService.createOrUpdateUserFromToken(tokenPayload, provider);
+      // Create or update user from the provider token (now handles user info extraction internally)
+      const user = await this.authService.createOrUpdateUserFromToken(providerToken, provider);
       
       // Generate internal JWT token
       const internalToken = await this._generateInternalToken(user);

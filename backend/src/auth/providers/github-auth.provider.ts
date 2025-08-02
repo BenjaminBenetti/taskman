@@ -1,4 +1,4 @@
-import type { AuthProvider, TokenPayload } from "../interfaces/auth-provider.interface.ts";
+import type { AuthProvider, TokenPayload, UserInfo } from "../interfaces/auth-provider.interface.ts";
 import type { User } from "@taskman/backend";
 import { prisma } from "../../prisma/index.ts";
 
@@ -65,6 +65,72 @@ export class GitHubAuthProvider implements AuthProvider {
       };
     } catch (error) {
       throw new Error(`Token verification failed: ${(error as Error).message}`);
+    }
+  }
+  
+  /**
+   * Gets user information from GitHub API including email address
+   * 
+   * @param token - The GitHub access token string
+   * @returns Promise<UserInfo> - User information with guaranteed email
+   * @throws Error if user info cannot be retrieved or email is not available
+   */
+  async getUserInfoFromToken(token: string): Promise<UserInfo> {
+    try {
+      // First get basic user info
+      const userResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'TaskMan-Agent'
+        }
+      });
+      
+      if (!userResponse.ok) {
+        throw new Error(`GitHub API user request failed: ${userResponse.status} ${userResponse.statusText}`);
+      }
+      
+      const userData = await userResponse.json();
+      
+      // If user has a public email, use it
+      if (userData.email) {
+        return {
+          email: userData.email,
+          name: userData.name || undefined,
+          login: userData.login,
+          avatar_url: userData.avatar_url || undefined,
+        };
+      }
+      
+      // Otherwise, fetch emails from /user/emails endpoint
+      const emailResponse = await fetch('https://api.github.com/user/emails', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'TaskMan-Agent'
+        }
+      });
+      
+      if (!emailResponse.ok) {
+        throw new Error(`GitHub API emails request failed: ${emailResponse.status} ${emailResponse.statusText}`);
+      }
+      
+      const emails = await emailResponse.json();
+      
+      // Find the primary email
+      const primaryEmail = emails.find((email: any) => email.primary);
+      if (!primaryEmail) {
+        throw new Error("No primary email found for GitHub user");
+      }
+      
+      return {
+        email: primaryEmail.email,
+        name: userData.name || undefined,
+        login: userData.login,
+        avatar_url: userData.avatar_url || undefined,
+      };
+    } catch (error) {
+      throw new Error(`Failed to get user info from GitHub: ${(error as Error).message}`);
     }
   }
   

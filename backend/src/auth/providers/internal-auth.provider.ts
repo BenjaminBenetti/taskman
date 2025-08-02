@@ -1,4 +1,4 @@
-import type { AuthProvider, TokenPayload } from "../interfaces/auth-provider.interface.ts";
+import type { AuthProvider, TokenPayload, UserInfo } from "../interfaces/auth-provider.interface.ts";
 import { JWTService } from "../services/jwt.service.ts";
 
 /**
@@ -65,6 +65,26 @@ export class InternalAuthProvider implements AuthProvider {
     } catch (error) {
       throw new Error(`Internal token verification failed: ${(error as Error).message}`);
     }
+  }
+  
+  /**
+   * Gets user information from internal JWT token
+   * 
+   * @param token - The internal JWT token string
+   * @returns Promise<UserInfo> - User information with guaranteed email
+   * @throws Error if token verification fails or email is not available
+   */
+  async getUserInfoFromToken(token: string): Promise<UserInfo> {
+    const payload = await this.verifyToken(token);
+    
+    if (!payload.email) {
+      throw new Error("Email is required but not found in internal token payload");
+    }
+    
+    return {
+      email: payload.email,
+      name: payload.name,
+    };
   }
   
   /* ========================================

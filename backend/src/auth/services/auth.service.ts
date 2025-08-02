@@ -1,8 +1,10 @@
 import type { User } from "../../users/models/user.model.ts";
-import type { TokenPayload } from "../interfaces/auth-provider.interface.ts";
+import type { TokenPayload, UserInfo } from "../interfaces/auth-provider.interface.ts";
+import type { ExternalAuthProvider } from "../types/auth-provider.type.ts";
 import { UsersRepository } from "../../users/repositories/users.repository.ts";
 import { UsersService } from "../../users/services/users.service.ts";
 import { userConverter } from "../../users/converters/user.converter.ts";
+import { AuthProviderFactory } from "../factories/auth-provider.factory.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 
 /**
@@ -21,19 +23,24 @@ export class AuthService {
    * ======================================== */
 
   /**
-   * Create or update a user from a verified token payload
+   * Create or update a user from a provider token
    * 
    * If user exists, updates them with latest info from identity provider.
    * If user doesn't exist, creates them with all required relationships.
    * 
-   * @param payload - The verified token payload containing user information
+   * @param token - The provider token to get user information from
    * @param identityProvider - The name of the identity provider (e.g., "google")
    * @returns Promise<User> - The created or updated user
    */
   async createOrUpdateUserFromToken(
-    payload: TokenPayload,
-    identityProvider: string
+    token: string,
+    identityProvider: ExternalAuthProvider
   ): Promise<User> {
+    // Get auth provider and extract user info from token
+    const authProvider = AuthProviderFactory.create(identityProvider);
+    const userInfo = await authProvider.getUserInfoFromToken(token);
+    const payload = await authProvider.verifyToken(token);
+    
     const existingUserEntity = await this.usersRepository.findByIdentityProvider(
       identityProvider,
       payload.sub
@@ -46,13 +53,13 @@ export class AuthService {
        * Update Existing User
        * ======================================== */
       
-      return await this._updateUserFromPayload(existingUser.id, payload);
+      return await this._updateUserFromUserInfo(existingUser.id, userInfo);
     } else {
       /* ========================================
        * Create New User
        * ======================================== */
       
-      return await this._createNewUserFromPayload(payload, identityProvider);
+      return await this._createNewUserFromUserInfo(userInfo, payload.sub, identityProvider);
     }
   }
 
@@ -85,10 +92,10 @@ export class AuthService {
   /**
    * Update user with latest information from identity provider
    */
-  private async _updateUserFromPayload(userId: string, payload: TokenPayload): Promise<User> {
+  private async _updateUserFromUserInfo(userId: string, userInfo: UserInfo): Promise<User> {
     const updateData: Prisma.UserUpdateInput = {
-      email: payload.email,
-      name: payload.name as string | undefined
+      email: userInfo.email,
+      name: userInfo.name as string | undefined
     };
 
     const updatedUserEntity = await this.usersRepository.update(userId, updateData);
@@ -98,44 +105,25 @@ export class AuthService {
   /**
    * Create a new user with all required relationships (tenant and self-assignee)
    * 
-   * @param payload - The verified token payload containing user information
+   * @param userInfo - The user information from the identity provider
+   * @param identityProviderId - The identity provider user ID (sub claim)
    * @param identityProvider - The name of the identity provider (e.g., "google")
    * @returns Promise<User> - The newly created user
    */
-  private async _createNewUserFromPayload(
-    payload: TokenPayload,
+  private async _createNewUserFromUserInfo(
+    userInfo: UserInfo,
+    identityProviderId: string,
     identityProvider: string
   ): Promise<User> {
-    // Extract user data from payload
-    const userData = this._extractUserDataFromPayload(payload);
-    const userName = userData.name || userData.email.split("@")[0];
+    const userName = userInfo.name || userInfo.email.split("@")[0];
 
     // Delegate user creation orchestration to UserService
     return await this.usersService.createUser(
       userName,
-      userData.email,
+      userInfo.email,
       identityProvider,
-      userData.identityProviderId
+      identityProviderId
     );
-  }
-
-  /**
-   * Extract user creation data from identity provider payload
-   */
-  private _extractUserDataFromPayload(payload: TokenPayload): {
-    email: string;
-    name?: string;
-    identityProviderId: string;
-  } {
-    if (!payload.email) {
-      throw new Error("Email is required but not found in token payload");
-    }
-
-    return {
-      email: payload.email,
-      name: payload.name as string | undefined,
-      identityProviderId: payload.sub
-    };
   }
 
 }
