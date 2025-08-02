@@ -246,3 +246,43 @@ export function writeLogEntry(entry: LogEntry): void {
   
   console.log(logLine);
 }
+
+/**
+ * Writes error details to stderr with full stack trace
+ * 
+ * This function provides detailed error logging including stack traces
+ * for debugging purposes, separate from the nginx-style access logs.
+ * 
+ * @param error - The error object to log
+ * @param context - Additional context about where the error occurred
+ */
+export function writeErrorLog(error: unknown, context: {
+  path?: string;
+  type?: string;
+  user?: string;
+  tenantId?: string;
+}): void {
+  const timestamp = new Date().toISOString();
+  const message = error instanceof Error ? error.message : "Unknown error";
+  const stack = error instanceof Error ? error.stack : undefined;
+  
+  // Format context information
+  const contextInfo = [
+    `Path: ${context.path || "unknown"}`,
+    `Type: ${context.type || "unknown"}`,
+    `User: ${context.user || "anonymous"}`,
+    context.tenantId ? `Tenant: ${context.tenantId}` : null
+  ].filter(Boolean).join(" | ");
+  
+  // Build complete error message as single string
+  const errorOutput = [
+    `\n=== TRPC ERROR [${timestamp}] ===`,
+    `Message: ${message}`,
+    `Context: ${contextInfo}`,
+    stack ? `Stack Trace:\n${stack}` : null,
+    `=== END ERROR ===\n`
+  ].filter(Boolean).join("\n");
+  
+  // Log as single atomic operation
+  console.error(errorOutput);
+}
