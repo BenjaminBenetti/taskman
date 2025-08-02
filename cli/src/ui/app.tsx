@@ -23,7 +23,7 @@ export const App: React.FC = () => {
       try {
         const isAuthenticated = await AuthServiceFactory.isAuthenticated();
         if (isAuthenticated) {
-          toDashboardWithAuth();
+          goToDashboard();
         } else {
           goToAuth();
         }
@@ -38,14 +38,6 @@ export const App: React.FC = () => {
     checkAuth();
   }, [goToDashboard, goToAuth]);
 
-  // Call the users me endpoint to ensure the user is created and 
-  // transition to the dashboard page.
-  const toDashboardWithAuth = async () => {
-    const trpcClient = await TrpcClientFactory.create();
-    await trpcClient.users.me.query();
-    goToDashboard();
-  };
-
   // Show loading while checking authentication
   if (isCheckingAuth) {
     return null;
@@ -53,7 +45,7 @@ export const App: React.FC = () => {
 
   // Render auth page with callback to transition to dashboard
   if (currentPage === 'auth') {
-    return <AuthPage onAuthSuccess={toDashboardWithAuth} />;
+    return <AuthPage onAuthSuccess={goToDashboard} />;
   }
 
   // Render dashboard

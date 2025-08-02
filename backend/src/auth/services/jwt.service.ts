@@ -107,10 +107,6 @@ export class JWTService {
     if (!config.jwt.signingKey) {
       throw new Error("JWT signing key is required but not configured");
     }
-    
-    if (config.jwt.signingKey.length < 32) {
-      throw new Error("JWT signing key must be at least 32 characters for security");
-    }
   }
   
   /**

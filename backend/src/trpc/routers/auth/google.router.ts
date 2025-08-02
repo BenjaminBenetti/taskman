@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../../index.ts";
+import { router } from "../../index.ts";
+import { publicProcedure } from "../../middleware/publicProcedure.ts";
 import { GoogleTokenExchangeService } from "../../../auth/google/services/google-token-exchange.service.ts";
 
 /**

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../../index.ts";
+import { router } from "../../index.ts";
+import { publicProcedure } from "../../middleware/publicProcedure.ts";
 import { InternalTokenExchangeService } from "../../../auth/services/internal-token-exchange.service.ts";
 import type { ExternalAuthProvider } from "../../../auth/types/auth-provider.type.ts";
 

@@ -1,4 +1,5 @@
-import { router, publicProcedure } from "../index.ts";
+import { router } from "../index.ts";
+import { publicProcedure } from "../middleware/publicProcedure.ts";
 import { config } from "../../config/index.ts";
 import type { ClientConfig } from "../../config/client/index.ts";
 

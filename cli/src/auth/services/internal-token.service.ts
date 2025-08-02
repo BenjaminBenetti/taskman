@@ -25,38 +25,34 @@ export class InternalTokenService {
    * @returns Promise that resolves to updated session with internal token, or original session on failure
    */
   public async exchangeForInternalToken(session: AuthSession): Promise<AuthSession> {
-    try {
-      // Get the appropriate auth service for this provider
-      const authService = await AuthServiceFactory.getServiceForProvider(session.provider);
-      
-      // Get the provider-specific backend token
-      const providerToken = (authService as BaseAuthService).getProviderBackendToken(session);
-      if (!providerToken) {
-        // No suitable token available for exchange, return original session
-        return session;
-      }
-
-      // Exchange with backend
-      const trpcClient = PublicTrpcClientFactory.create();
-      const exchangeResult = await trpcClient.auth.internal.exchange.mutate({
-        providerToken,
-        provider: session.provider as ExternalAuthProvider,
-      });
-
-      // Calculate expiration timestamp
-      const internalExpiresAt = Math.floor(Date.now() / 1000) + exchangeResult.expiresIn;
-
-      // Return updated session with internal token
-      return {
-        ...session,
-        internalToken: exchangeResult.internalToken,
-        internalExpiresAt,
-      };
-    } catch (_error) {
-      // If service creation or token exchange fails, return original session
-      // This maintains backward compatibility and graceful degradation
+    
+    // Get the appropriate auth service for this provider
+    const authService = await AuthServiceFactory.getServiceForProvider(session.provider);
+    
+    // Get the provider-specific backend token
+    const providerToken = (authService as BaseAuthService).getProviderBackendToken(session);
+    if (!providerToken) {
+      // No suitable token available for exchange, return original session
       return session;
     }
+
+    // Exchange with backend
+    const trpcClient = PublicTrpcClientFactory.create();
+    const exchangeResult = await trpcClient.auth.internal.exchange.mutate({
+      providerToken,
+      provider: session.provider as ExternalAuthProvider,
+    });
+
+    // Calculate expiration timestamp
+    const internalExpiresAt = Math.floor(Date.now() / 1000) + exchangeResult.expiresIn;
+
+
+    // Return updated session with internal token
+    return {
+      ...session,
+      internalToken: exchangeResult.internalToken,
+      internalExpiresAt,
+    };
   }
 
   /**
