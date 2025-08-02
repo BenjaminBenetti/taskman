@@ -36,4 +36,10 @@ export interface AuthSession {
   
   /** Additional provider-specific data */
   readonly metadata?: Record<string, unknown>;
+  
+  /** Internal JWT token for unified backend authentication */
+  readonly internalToken?: string;
+  
+  /** When the internal token expires (Unix timestamp) */
+  readonly internalExpiresAt?: number;
 }

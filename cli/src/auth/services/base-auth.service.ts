@@ -3,6 +3,7 @@ import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import type { AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
 import type { BackendTokenProvider } from "../interfaces/backend-token-provider.interface.ts";
 import { config } from "../../config/index.ts";
+import { InternalTokenService } from "./internal-token.service.ts";
 
 /**
  * Generic authentication service implementation
@@ -13,6 +14,7 @@ import { config } from "../../config/index.ts";
  */
 export abstract class BaseAuthService implements AuthService, BackendTokenProvider {
   private session: AuthSession | null = null;
+  private internalTokenService = new InternalTokenService();
 
   // ================================================
   // Abstract Methods
@@ -42,16 +44,27 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
   protected abstract performRefresh(refreshToken: string): Promise<AuthSession>;
 
   /**
-   * Abstract method for determining which token to send to the backend
+   * Abstract method for determining which provider token to send to the backend
+   * This is used as fallback when internal token is not available
    * 
    * @param session The current authentication session
-   * @returns The token to use for backend authentication, or null if none available
+   * @returns The provider token to use for backend authentication, or null if none available
    */
-  abstract getBackendToken(session: AuthSession): string | null;
+  abstract getProviderBackendToken(session: AuthSession): string | null;
 
   // ================================================
   // Public Methods
   // ================================================
+
+  /**
+   * Get the backend authentication token, preferring internal tokens over provider tokens
+   * 
+   * @param session The current authentication session
+   * @returns The token to use for backend authentication, or null if none available
+   */
+  public getBackendToken(session: AuthSession): string | null {
+    return session.internalToken ?? null;
+  }
 
   /**
    * Initiate the login flow
@@ -73,6 +86,8 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
   public async logout(): Promise<void> {
     if (this.session) {
       await this.performLogout();
+      // Clean up internal token before nullifying session
+      this.session = this.internalTokenService.removeInternalToken(this.session);
       this.session = null;
       await this.clearPersistedSession();
     }
@@ -90,6 +105,12 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
     
     if (this.session && this.isSessionExpired(this.session)) {
       await this.refreshCurrentSession();
+    }
+    
+    // Refresh internal token if needed
+    if (this.session) {
+      this.session = await this.internalTokenService.refreshInternalTokenIfNeeded(this.session);
+      await this.persistSession();
     }
     
     return this.session;
@@ -126,6 +147,21 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
       await this.clearPersistedSession();
       return null;
     }
+  }
+
+  // ================================================
+  // Protected Methods
+  // ================================================
+
+  /**
+   * Exchange session tokens for internal token
+   * This is available to subclasses for use during login/refresh flows
+   * 
+   * @param session The authentication session to enhance with internal token
+   * @returns Promise that resolves to updated session with internal token
+   */
+  protected async exchangeForInternalToken(session: AuthSession): Promise<AuthSession> {
+    return await this.internalTokenService.exchangeForInternalToken(session);
   }
 
   // ================================================

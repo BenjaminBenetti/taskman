@@ -145,7 +145,7 @@ export class GoogleAuthService extends BaseAuthService {
   }
 
   /**
-   * Get the backend authentication token for Google (ID token)
+   * Get the provider backend authentication token for Google (ID token)
    * 
    * For Google, we use the ID token (JWT) for backend authentication
    * as it contains the user's identity claims that can be verified.
@@ -153,7 +153,7 @@ export class GoogleAuthService extends BaseAuthService {
    * @param session The current authentication session
    * @returns The ID token if available, otherwise null
    */
-  getBackendToken(session: AuthSession): string | null {
+  getProviderBackendToken(session: AuthSession): string | null {
     return session.idToken || null;
   }
 
@@ -175,7 +175,7 @@ export class GoogleAuthService extends BaseAuthService {
     });
     const userInfo = await this.fetchUserInfo(tokenData.accessToken);
 
-    return {
+    const session: AuthSession = {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken || refreshToken,
       idToken: tokenData.idToken,
@@ -186,6 +186,9 @@ export class GoogleAuthService extends BaseAuthService {
       picture: userInfo.picture,
       expiresAt: tokenData.expiresIn ? Math.floor(Date.now() / 1000) + tokenData.expiresIn : undefined,
     };
+
+    // Exchange for internal token
+    return await this.exchangeForInternalToken(session);
   }
 
   // ================================================
@@ -413,7 +416,7 @@ export class GoogleAuthService extends BaseAuthService {
 
     const userInfo = await this.fetchUserInfo(tokenData.accessToken);
 
-    return {
+    const session: AuthSession = {
       accessToken: tokenData.accessToken,
       refreshToken: tokenData.refreshToken,
       idToken: tokenData.idToken,
@@ -424,6 +427,9 @@ export class GoogleAuthService extends BaseAuthService {
       picture: userInfo.picture,
       expiresAt: tokenData.expiresIn ? Math.floor(Date.now() / 1000) + tokenData.expiresIn : undefined,
     };
+
+    // Exchange for internal token
+    return await this.exchangeForInternalToken(session);
   }
 
   /**

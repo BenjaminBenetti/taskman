@@ -25,7 +25,7 @@ export class TrpcClientFactory {
     const headers: Record<string, string> = {};
     
     if (session && authService) {
-      // Use provider-specific backend token (e.g., ID token for Google, access token for GitHub)
+      // Use internal token if available, otherwise fallback to provider-specific token
       const backendToken = authService.getBackendToken(session);
       if (backendToken) {
         headers.Authorization = `Bearer ${backendToken}`;

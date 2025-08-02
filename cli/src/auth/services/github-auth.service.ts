@@ -164,7 +164,7 @@ export class GitHubAuthService extends BaseAuthService {
    * @param session - The current authentication session
    * @returns - The access token for the backend
    */
-  public override getBackendToken(session: AuthSession): string | null {
+  getProviderBackendToken(session: AuthSession): string | null {
     return session.accessToken;
   }
 
@@ -426,7 +426,7 @@ export class GitHubAuthService extends BaseAuthService {
 
     const userInfo = await this.fetchUserInfo(tokenData.accessToken);
 
-    return {
+    const session: AuthSession = {
       accessToken: tokenData.accessToken,
       refreshToken: undefined, // GitHub doesn't provide refresh tokens
       provider: AuthProvider.GitHub,
@@ -436,6 +436,9 @@ export class GitHubAuthService extends BaseAuthService {
       picture: userInfo.avatar_url,
       expiresAt: undefined, // GitHub tokens don't expire
     };
+
+    // Exchange for internal token
+    return await this.exchangeForInternalToken(session);
   }
 
   /**

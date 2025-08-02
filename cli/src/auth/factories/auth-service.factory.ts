@@ -97,6 +97,19 @@ export class AuthServiceFactory {
     return this.currentProvider;
   }
 
+  /**
+   * Get a service instance for a specific provider without setting it as current
+   * 
+   * This method is useful when you need to access provider-specific functionality
+   * without changing the current active service instance.
+   * 
+   * @param provider The authentication provider
+   * @returns Promise that resolves to the auth service for the specified provider
+   */
+  public static async getServiceForProvider(provider: AuthProvider): Promise<AuthService> {
+    return await this.createServiceForProvider(provider);
+  }
+
   // ================================================
   // Private Static Methods
   // ================================================
