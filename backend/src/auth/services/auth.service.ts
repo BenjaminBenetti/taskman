@@ -5,6 +5,7 @@ import { UsersRepository } from "../../users/repositories/users.repository.ts";
 import { UsersService } from "../../users/services/users.service.ts";
 import { userConverter } from "../../users/converters/user.converter.ts";
 import { AuthProviderFactory } from "../factories/auth-provider.factory.ts";
+import { EmailConflictException } from "../exceptions/email-conflict.exception.ts";
 import { type Prisma } from "../../generated/prisma/client.ts";
 
 /**
@@ -59,6 +60,9 @@ export class AuthService {
        * Create New User
        * ======================================== */
       
+      // Check for email conflicts with existing users from different providers
+      await this._checkForEmailConflicts(userInfo.email, identityProvider);
+      
       return await this._createNewUserFromUserInfo(userInfo, payload.sub, identityProvider);
     }
   }
@@ -100,6 +104,28 @@ export class AuthService {
 
     const updatedUserEntity = await this.usersRepository.update(userId, updateData);
     return userConverter.toDomain(updatedUserEntity);
+  }
+
+  /**
+   * Check for email conflicts with existing users from different providers
+   * 
+   * @param email - The email address to check for conflicts
+   * @param currentProvider - The identity provider attempting to register
+   * @throws EmailConflictException if email exists with different provider
+   */
+  private async _checkForEmailConflicts(
+    email: string,
+    currentProvider: string
+  ): Promise<void> {
+    const existingUserEntity = await this.usersRepository.findByEmail(email);
+    
+    if (existingUserEntity && existingUserEntity.identityProvider !== currentProvider) {
+      throw new EmailConflictException(
+        email,
+        existingUserEntity.identityProvider,
+        currentProvider
+      );
+    }
   }
 
   /**

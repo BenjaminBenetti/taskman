@@ -24,8 +24,11 @@ You must follow these steps when implementing a change:
    frameworks, assign the `library-research-specialist` subagent to gather
    information. And provide insight in to the best practices around these
    libraries.
-3. **Assign Code Architect Subagent**: If the change involves editing code,
-   assign the `feature-architect` subagent to plan the implementation.
+3. **Architect The Solution**: If the change involves editing code,
+   you will architect the solution YOUR SELF. You will review the research information
+   provided by the `library-research-specialist` and you will inspect the code base 
+   to come up with a comprehensive plan for the change. You will READ the following:
+   /.claude/agents/feature-architect.md to get guidance on how to complete this task.
 4. **Assign Clean Code Engineer Subagent**: To implement the plan from the
    `feature-architect`, assign the `clean-code-engineer` subagent to write or
    refactor the code.

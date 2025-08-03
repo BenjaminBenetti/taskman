@@ -45,4 +45,26 @@ export class UsersRepository extends BaseRepository<
       }
     });
   }
+
+  /**
+   * Find a user by email address
+   * 
+   * Searches for users by email regardless of identity provider.
+   * Used for email conflict detection during authentication.
+   * 
+   * @param email - The email address to search for
+   * @param tx - Optional transaction client for database operations
+   * @returns Promise<UserModel | null> - The user if found, null otherwise
+   */
+  async findByEmail(
+    email: string,
+    tx?: Prisma.TransactionClient
+  ): Promise<UserModel | null> {
+    return await this.getDelegate(tx).findFirst({
+      where: {
+        email,
+        deletedAt: null
+      }
+    });
+  }
 }

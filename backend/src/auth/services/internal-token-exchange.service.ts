@@ -1,6 +1,7 @@
 import type { TokenExchangeResult } from "../interfaces/token-exchange-result.interface.ts";
 import type { User } from "../../users/models/user.model.ts";
 import type { ExternalAuthProvider } from "../types/auth-provider.type.ts";
+import { TRPCError } from "@trpc/server";
 import { AuthProviderFactory } from "../factories/auth-provider.factory.ts";
 import { AuthService } from "./auth.service.ts";
 import { JWTService } from "./jwt.service.ts";
@@ -58,6 +59,12 @@ export class InternalTokenExchangeService {
         expiresIn
       };
     } catch (error) {
+      // Re-throw TRPCErrors (like EmailConflictException) to preserve error codes and messages
+      if (error instanceof TRPCError) {
+        throw error;
+      }
+      
+      // Wrap other errors in a generic error message
       throw new Error(`Token exchange failed: ${(error as Error).message}`);
     }
   }
