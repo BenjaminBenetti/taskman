@@ -33,6 +33,7 @@ export const GoogleAuthPage: React.FC<GoogleAuthPageProps> = ({
     state: AuthFlowState.Initializing,
     message: 'Starting Google authentication...'
   });
+  const [isDisplayingError, setIsDisplayingError] = useState(false);
 
 
   // Start authentication flow on component mount
@@ -77,21 +78,64 @@ export const GoogleAuthPage: React.FC<GoogleAuthPageProps> = ({
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         
+        // Set flag to indicate we're in error display mode
+        setIsDisplayingError(true);
+        
+        // Update status to show error with countdown message
         setAuthStatus({
           state: AuthFlowState.Error,
-          message: 'Authentication failed',
+          message: 'Authentication failed - Reading error message in browser...',
           error: {
             code: 'AUTH_FAILED',
-            description: errorMessage
+            description: `${errorMessage} (Page will close automatically in 10 seconds)`
           }
         });
 
-        onAuthError?.(error instanceof Error ? error : new Error(errorMessage));
+        // Wait for the error display period to complete before calling onAuthError
+        // This ensures the CLI stays on this page while the browser shows the error
+        setTimeout(() => {
+          setIsDisplayingError(false);
+          onAuthError?.(error instanceof Error ? error : new Error(errorMessage));
+        }, 10500); // Slightly longer than the auth service delay to ensure coordination
       }
     };
 
     performAuthentication();
   }, [onAuthSuccess, onAuthError]);
+
+  // Update the status message during error display to show countdown
+  React.useEffect(() => {
+    if (!isDisplayingError) return;
+    
+    let countdown = 10;
+    const updateCountdown = () => {
+      if (countdown > 0) {
+        setAuthStatus((prev: AuthFlowStatus) => ({
+          ...prev,
+          message: `Authentication failed - Reading error message in browser... (${countdown}s remaining)`,
+          error: {
+            ...prev.error!,
+            description: `${prev.error?.description?.split(' (Page')[0]} (Page will close automatically in ${countdown} seconds)`
+          }
+        }));
+        countdown--;
+        setTimeout(updateCountdown, 1000);
+      } else {
+        setAuthStatus((prev: AuthFlowStatus) => ({
+          ...prev,
+          message: 'Authentication failed - Returning to authentication options...',
+          error: {
+            ...prev.error!,
+            description: prev.error?.description?.split(' (Page')[0] || ''
+          }
+        }));
+      }
+    };
+    
+    // Start countdown after a brief delay
+    const timeoutId = setTimeout(updateCountdown, 500);
+    return () => clearTimeout(timeoutId);
+  }, [isDisplayingError]);
 
   /**
    * Perform login with status updates throughout the flow
