@@ -2,8 +2,11 @@ import type { AuthService } from "../interfaces/auth-service.interface.ts";
 import type { AuthSession } from "../interfaces/auth-session.interface.ts";
 import type { AuthFlowStatusCallback } from "../interfaces/auth-flow-status.interface.ts";
 import type { BackendTokenProvider } from "../interfaces/backend-token-provider.interface.ts";
+import type { User } from "@taskman/backend";
 import { config } from "../../config/index.ts";
 import { InternalTokenService } from "./internal-token.service.ts";
+import { TrpcClientFactory } from "../../trpc/factory/trpc-client.factory.ts";
+import { userConverter } from "../../users/converters/user.converter.ts";
 
 /**
  * Generic authentication service implementation
@@ -128,7 +131,7 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
 
   /**
    * Refresh the current session
-   * 
+   *
    * @returns Promise that resolves to the refreshed session or null if refresh fails
    */
   public async refreshCurrentSession(): Promise<AuthSession | null> {
@@ -146,6 +149,54 @@ export abstract class BaseAuthService implements AuthService, BackendTokenProvid
       this.session = null;
       await this.clearPersistedSession();
       return null;
+    }
+  }
+
+  /**
+   * Get the currently authenticated user's information from the backend
+   *
+   * @returns Promise that resolves to the user information with Date objects properly converted
+   * @throws Error if not authenticated or if the request fails
+   */
+  public async getCurrentUserInfo(): Promise<User> {
+    // Ensure we have an active authenticated session
+    const session = await this.getCurrentSession();
+    if (!session) {
+      throw new Error("Not authenticated - please log in first");
+    }
+
+    try {
+      // Create authenticated TRPC client
+      const trpcClient = await TrpcClientFactory.create();
+
+      // Query the users.me endpoint
+      const serializedUserInfo = await trpcClient.users.me.query();
+
+      if (!serializedUserInfo) {
+        throw new Error("Failed to retrieve user information from backend");
+      }
+
+      // Use the established converter pattern to transform serialized data to domain model
+      return userConverter.fromSerialized(serializedUserInfo);
+    } catch (error) {
+      // Handle different types of errors appropriately
+      if (error instanceof Error) {
+        // Check for authentication-related errors
+        if (error.message.includes('UNAUTHORIZED') || error.message.includes('Authentication required')) {
+          throw new Error("Authentication failed - please log in again");
+        }
+
+        // Check for network-related errors
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('ECONNREFUSED')) {
+          throw new Error("Network error - unable to connect to backend service");
+        }
+
+        // Re-throw the original error with context
+        throw new Error(`Failed to get user information: ${error.message}`);
+      }
+
+      // Handle non-Error objects
+      throw new Error("An unexpected error occurred while retrieving user information");
     }
   }
 
