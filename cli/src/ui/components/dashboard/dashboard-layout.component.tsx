@@ -93,7 +93,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }: Da
       >
         <Box justifyContent="center" width={terminalSize.width}>
           <Text dimColor>
-            Press Ctrl+C to exit • Tab navigation: Tab/Shift+Tab or ←/→ or h/l
+            Press Ctrl+C to exit • Tab navigation: PageUp/PageDown
           </Text>
         </Box>
       </Box>

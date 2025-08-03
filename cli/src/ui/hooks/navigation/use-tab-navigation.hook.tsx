@@ -8,7 +8,7 @@ import type { TabItem, TabKey, TabNavigationHook } from './navigation.types.ts';
 
 /**
  * Custom hook for managing tab navigation in the dashboard
- * Provides keyboard navigation with Tab key switching
+ * Provides keyboard navigation with PageUp/PageDown key switching
  */
 export const useTabNavigation = (initialTab: TabKey = 'dashboard'): TabNavigationHook => {
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
@@ -36,14 +36,10 @@ export const useTabNavigation = (initialTab: TabKey = 'dashboard'): TabNavigatio
   };
 
   // Handle keyboard input for tab navigation
-  useInput((input, key) => {
-    if (key.tab && !key.shift) {
+  useInput((_input, key) => {
+    if (key.pageDown) {
       nextTab();
-    } else if (key.tab && key.shift) {
-      previousTab();
-    } else if (key.rightArrow || input === 'l') {
-      nextTab();
-    } else if (key.leftArrow || input === 'h') {
+    } else if (key.pageUp) {
       previousTab();
     }
   });

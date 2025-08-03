@@ -33,7 +33,7 @@ export const DashboardMainPage: React.FC<DashboardMainPageProps> = ({ children }
         
         <Box marginTop={2}>
           <Text dimColor>
-            This is a placeholder page. Use Tab to navigate to other sections.
+            This is a placeholder page. Use PageUp/PageDown to navigate to other sections.
           </Text>
         </Box>
       </Box>
