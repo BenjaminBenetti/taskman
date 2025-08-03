@@ -5,9 +5,8 @@ import { GitHubAuthPage } from './github-auth-page.tsx';
 import type { AuthSession } from '../../../auth/interfaces/auth-session.interface.ts';
 
 const options = [
-  { text: 'Sign in with Google', enabled: true },
   { text: 'Sign in with GitHub', enabled: true },
-  { text: 'Sign in with Apple', enabled: false },
+  { text: 'Sign in with Google', enabled: true },
   { text: 'Exit', enabled: true }
 ];
 
