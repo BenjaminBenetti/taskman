@@ -12,7 +12,7 @@ export interface Assignee {
   notes?: string | null;
   isActive: boolean;
   tenantId: string;
-  creatorId: string;
+  creatorId: string | null;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;

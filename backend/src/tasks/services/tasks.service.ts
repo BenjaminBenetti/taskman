@@ -6,6 +6,7 @@ import { type Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../prisma/index.ts";
 import { TaskStatus, Priority } from "../../generated/prisma/enums.ts";
 import { TRPCError } from "@trpc/server";
+import type { User } from "../../users/models/user.model.ts";
 
 /**
  * Tasks Service
@@ -38,7 +39,7 @@ export class TasksService {
    * priority settings, and reminder configurations. Enforces tenant isolation
    * and validates that assigned users exist and are active.
    * 
-   * @param tenantId - The tenant ID for data isolation
+   * @param actor - The user performing the action (provides tenant context and creator ID)
    * @param title - The task title (required)
    * @param description - Optional task description
    * @param status - Initial task status (defaults to PENDING)
@@ -46,16 +47,14 @@ export class TasksService {
    * @param assigneeId - Optional assignee ID (must exist and be active)
    * @param remindAt - Optional reminder date/time
    * @param remindIntervalMinutes - Optional reminder interval in minutes
-   * @param creatorId - The user ID creating the task
    * @returns Promise<Task> - The created task with all relationships
    * @throws {TRPCError} When validation fails or assignee is invalid
    * 
    * @example
    * ```typescript
    * const newTask = await tasksService.createTask(
-   *   'tenant-123',
+   *   actor,
    *   'Implement user authentication',
-   *   'creator-789',
    *   'Add JWT-based auth with Google OAuth',
    *   TaskStatus.PENDING,
    *   Priority.HIGH,
@@ -66,9 +65,8 @@ export class TasksService {
    * ```
    */
   async createTask(
-    tenantId: string,
+    actor: User,
     title: string,
-    creatorId: string,
     description?: string | null,
     status: TaskStatus = TaskStatus.PENDING,
     priority: Priority = Priority.MEDIUM,
@@ -92,7 +90,7 @@ export class TasksService {
         }
 
         // Check if assignee belongs to the same tenant
-        if (assignee.tenantId !== tenantId) {
+        if (assignee.tenantId !== actor.tenantId) {
           throw new TRPCError({
             code: 'FORBIDDEN',
             message: 'Cannot assign task to assignee from different tenant',
@@ -135,8 +133,8 @@ export class TasksService {
         priority,
         remindAt,
         remindIntervalMinutes,
-        tenant: { connect: { id: tenantId } },
-        creator: { connect: { id: creatorId } },
+        tenant: { connect: { id: actor.tenantId } },
+        creator: { connect: { id: actor.id } },
         assignee: assigneeId ? { connect: { id: assigneeId } } : undefined,
       };
 
@@ -144,7 +142,7 @@ export class TasksService {
       
       // Return task with relationships
       const taskWithRelations = await this.tasksRepository.getByIdWithTenant(
-        tenantId,
+        actor.tenantId,
         taskEntity.id,
         true,
         tx
@@ -168,21 +166,21 @@ export class TasksService {
    * Includes all relationship data (creator, assignee, message count) for
    * complete task information.
    * 
-   * @param tenantId - The tenant ID for data isolation
+   * @param actor - The user performing the action (provides tenant context)
    * @param taskId - The task ID to retrieve
    * @returns Promise<Task | null> - The task if found, null otherwise
    * 
    * @example
    * ```typescript
-   * const task = await tasksService.getTaskById('tenant-123', 'task-456');
+   * const task = await tasksService.getTaskById(actor, 'task-456');
    * if (task) {
    *   console.log(`Task: ${task.title} (${task.status})`);
    * }
    * ```
    */
-  async getTaskById(tenantId: string, taskId: string): Promise<Task | null> {
+  async getTaskById(actor: User, taskId: string): Promise<Task | null> {
     const taskEntity = await this.tasksRepository.getByIdWithTenant(
-      tenantId,
+      actor.tenantId,
       taskId,
       true
     );
@@ -197,24 +195,24 @@ export class TasksService {
    * Supports filtering by status, priority, assignee, creator, due dates, and
    * text search across title and description fields.
    * 
-   * @param tenantId - The tenant ID for data isolation
+   * @param actor - The user performing the action (provides tenant context)
    * @param filters - Optional filtering criteria
    * @returns Promise<Task[]> - Array of tasks matching filter criteria
    * 
    * @example
    * ```typescript
    * const highPriorityTasks = await tasksService.getTasksByTenant(
-   *   'tenant-123',
+   *   actor,
    *   { priority: Priority.HIGH, status: TaskStatus.PENDING, limit: 20 }
    * );
    * ```
    */
   async getTasksByTenant(
-    tenantId: string,
+    actor: User,
     filters?: TaskFilters
   ): Promise<Task[]> {
     const taskEntities = await this.tasksRepository.findByTenantWithFilters(
-      tenantId,
+      actor.tenantId,
       filters,
       true
     );
@@ -229,7 +227,7 @@ export class TasksService {
    * assignee relationships, and reminder configurations. Enforces business
    * rules for status changes and maintains data integrity.
    * 
-   * @param tenantId - The tenant ID for data isolation
+   * @param actor - The user performing the action (provides tenant context)
    * @param taskId - The task ID to update
    * @param updateData - Partial task data to update
    * @returns Promise<Task> - The updated task with all relationships
@@ -238,14 +236,14 @@ export class TasksService {
    * @example
    * ```typescript
    * const updatedTask = await tasksService.updateTask(
-   *   'tenant-123',
+   *   actor,
    *   'task-456',
    *   { status: TaskStatus.IN_PROGRESS, priority: Priority.URGENT }
    * );
    * ```
    */
   async updateTask(
-    tenantId: string,
+    actor: User,
     taskId: string,
     updateData: {
       title?: string;
@@ -263,7 +261,7 @@ export class TasksService {
        * ======================================== */
       
       const existingTask = await this.tasksRepository.getByIdWithTenant(
-        tenantId,
+        actor.tenantId,
         taskId,
         false,
         tx
@@ -291,7 +289,7 @@ export class TasksService {
             });
           }
 
-          if (assignee.tenantId !== tenantId) {
+          if (assignee.tenantId !== actor.tenantId) {
             throw new TRPCError({
               code: 'FORBIDDEN',
               message: 'Cannot assign task to assignee from different tenant',
@@ -353,7 +351,7 @@ export class TasksService {
       
       // Return updated task with relationships
       const updatedTaskEntity = await this.tasksRepository.getByIdWithTenant(
-        tenantId,
+        actor.tenantId,
         taskId,
         true,
         tx
@@ -377,18 +375,18 @@ export class TasksService {
    * timestamp. The task remains in the database for audit purposes but
    * is excluded from normal queries.
    * 
-   * @param tenantId - The tenant ID for data isolation
+   * @param actor - The user performing the action (provides tenant context)
    * @param taskId - The task ID to delete
    * @throws {TRPCError} When task not found or already deleted
    * 
    * @example
    * ```typescript
-   * await tasksService.deleteTask('tenant-123', 'task-456');
+   * await tasksService.deleteTask(actor, 'task-456');
    * ```
    */
-  async deleteTask(tenantId: string, taskId: string): Promise<void> {
+  async deleteTask(actor: User, taskId: string): Promise<void> {
     const existingTask = await this.tasksRepository.getByIdWithTenant(
-      tenantId,
+      actor.tenantId,
       taskId
     );
 

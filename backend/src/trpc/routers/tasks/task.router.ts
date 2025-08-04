@@ -163,9 +163,8 @@ export const taskRouter = router({
       const tasksService = new TasksService();
       
       return await tasksService.createTask(
-        ctx.user.tenantId,
+        ctx.user,
         input.title,
-        ctx.user.id,
         input.description,
         input.status,
         input.priority,
@@ -191,7 +190,7 @@ export const taskRouter = router({
     .query(async ({ input, ctx }) => {
       const tasksService = new TasksService();
       
-      return await tasksService.getTaskById(ctx.user.tenantId, input.taskId);
+      return await tasksService.getTaskById(ctx.user, input.taskId);
     }),
 
   /**
@@ -210,7 +209,7 @@ export const taskRouter = router({
     .query(async ({ input, ctx }) => {
       const tasksService = new TasksService();
       
-      return await tasksService.getTasksByTenant(ctx.user.tenantId, input);
+      return await tasksService.getTasksByTenant(ctx.user, input);
     }),
 
   /**
@@ -232,7 +231,7 @@ export const taskRouter = router({
       const { taskId, ...updateData } = input;
       
       return await tasksService.updateTask(
-        ctx.user.tenantId,
+        ctx.user,
         taskId,
         updateData
       );
@@ -254,7 +253,7 @@ export const taskRouter = router({
     .mutation(async ({ input, ctx }) => {
       const tasksService = new TasksService();
       
-      await tasksService.deleteTask(ctx.user.tenantId, input.taskId);
+      await tasksService.deleteTask(ctx.user, input.taskId);
     }),
 
 });
