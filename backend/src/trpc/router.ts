@@ -7,6 +7,7 @@ import { internalRouter } from "./routers/auth/internal.router.ts";
 import { userRouter } from "./routers/users/user.router.ts";
 import { taskRouter } from "./routers/tasks/task.router.ts";
 import { assigneeRouter } from "./routers/assignees/assignee.router.ts";
+import { chatMessageRouter } from "./routers/chatMessages/chat-message.router.ts";
 
 
 export const appRouter = router({
@@ -18,6 +19,7 @@ export const appRouter = router({
   users: userRouter,
   tasks: taskRouter,
   assignees: assigneeRouter,
+  chatMessages: chatMessageRouter,
   config: configRouter,
 
   /**

@@ -16,6 +16,12 @@ export const VALIDATION_LIMITS = {
     NOTES_MAX_LENGTH: 1000,
     SEARCH_MAX_LENGTH: 100,
   },
+
+  CHAT_MESSAGE: {
+    CONTENT_MAX_LENGTH: 10000,
+    CONTENT_MIN_LENGTH: 1,
+    SEARCH_MAX_LENGTH: 100,
+  },
   
   /* ========================================
    * Pagination Limits
