@@ -6,7 +6,7 @@ import { prisma } from "../../prisma/index.ts";
 import { TRPCError } from "@trpc/server";
 import { FieldValidators } from "../../shared/validation/field-validators.ts";
 import { VALIDATION_LIMITS } from "../../shared/constants/validation-limits.ts";
-import { type AssigneeFilters } from "../validation/assignee-filters.interface.ts";
+import { type AssigneeFilters } from "../../trpc/routers/assignees/assignee.router.ts";
 import type { User } from "../../users/models/user.model.ts";
 
 /**

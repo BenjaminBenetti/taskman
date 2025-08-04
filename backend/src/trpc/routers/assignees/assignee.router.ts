@@ -1,13 +1,164 @@
+import { z } from "zod";
 import { router } from "../../index.ts";
 import { protectedProcedure } from "../../middleware/protectedProcedure.ts";
 import { AssigneesService } from "../../../assignees/services/assignees.service.ts";
-import {
-  createAssigneeInput,
-  updateAssigneeInput,
-  getAssigneesInput,
-  assigneeIdInput,
-} from "../../../assignees/validation/index.ts";
+import { VALIDATION_LIMITS } from "../../../shared/constants/validation-limits.ts";
 
+/* ========================================
+ * Validation Schemas
+ * ======================================== */
+
+/**
+ * Assignee Filters Interface
+ *
+ * Defines the structure for filtering assignees in search operations.
+ * Used by the service layer for type-safe filtering operations.
+ */
+export interface AssigneeFilters {
+  /**
+   * Filter by active status
+   * - true: Only active assignees
+   * - false: Only inactive assignees
+   * - undefined: All assignees regardless of status
+   */
+  isActive?: boolean;
+
+  /**
+   * Filter by creator ID
+   * Only assignees created by the specified user
+   */
+  creatorId?: string;
+
+  /**
+   * Text search across name, email, and notes fields
+   * Case-insensitive search
+   */
+  search?: string;
+
+  /**
+   * Maximum number of results to return
+   * Must be between 1 and 100
+   */
+  limit?: number;
+
+  /**
+   * Number of results to skip for pagination
+   * Must be 0 or greater
+   */
+  offset?: number;
+}
+
+/**
+ * Assignee ID Input Validation Schema
+ *
+ * Simple validation schema for operations that only require an assignee ID.
+ * Ensures the ID is a valid UUID format for data integrity.
+ */
+const assigneeIdInput = z.object({
+  assigneeId: z.string().uuid("Invalid assignee ID format"),
+});
+
+/**
+ * Create Assignee Input Validation Schema
+ *
+ * Comprehensive validation schema for creating new assignees with business rules
+ * and data integrity constraints. Uses shared validation limits to eliminate
+ * magic numbers and maintain consistency.
+ */
+const createAssigneeInput = z.object({
+  name: z.string()
+    .min(1, "Assignee name is required")
+    .max(VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH, `Assignee name must be ${VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH} characters or less`)
+    .trim(),
+
+  email: z.string()
+    .email("Invalid email format")
+    .optional()
+    .transform(val => val || null),
+
+  phone: z.string()
+    .max(VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH, `Phone number must be ${VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH} characters or less`)
+    .optional()
+    .transform(val => val || null),
+
+  notes: z.string()
+    .max(VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH, `Notes must be ${VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH} characters or less`)
+    .optional()
+    .transform(val => val || null),
+
+  isActive: z.boolean().default(true),
+});
+
+/**
+ * Update Assignee Input Validation Schema
+ *
+ * Flexible validation schema for partial assignee updates with optional fields
+ * and business rule enforcement. Uses shared validation limits for consistency.
+ */
+const updateAssigneeInput = z.object({
+  assigneeId: z.string().uuid("Invalid assignee ID format"),
+
+  name: z.string()
+    .min(1, "Assignee name cannot be empty")
+    .max(VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH, `Assignee name must be ${VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH} characters or less`)
+    .trim()
+    .optional(),
+
+  email: z.string()
+    .email("Invalid email format")
+    .nullish()
+    .transform(val => val === undefined ? undefined : val || null),
+
+  phone: z.string()
+    .max(VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH, `Phone number must be ${VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH} characters or less`)
+    .nullish()
+    .transform(val => val === undefined ? undefined : val || null),
+
+  notes: z.string()
+    .max(VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH, `Notes must be ${VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH} characters or less`)
+    .nullish()
+    .transform(val => val === undefined ? undefined : val || null),
+
+  isActive: z.boolean().optional(),
+});
+
+/**
+ * Get Assignees Input Validation Schema
+ *
+ * Comprehensive filtering options with pagination support for efficient
+ * assignee retrieval and search operations. Uses shared validation limits
+ * for consistent pagination and search constraints.
+ */
+const getAssigneesInput = z.object({
+  isActive: z.boolean().optional(),
+
+  creatorId: z.string().uuid("Invalid creator ID format").optional(),
+
+  search: z.string()
+    .max(VALIDATION_LIMITS.ASSIGNEE.SEARCH_MAX_LENGTH, `Search term must be ${VALIDATION_LIMITS.ASSIGNEE.SEARCH_MAX_LENGTH} characters or less`)
+    .trim()
+    .optional(),
+
+  limit: z.number()
+    .int("Limit must be a whole number")
+    .min(VALIDATION_LIMITS.PAGINATION.MIN_LIMIT, `Limit must be at least ${VALIDATION_LIMITS.PAGINATION.MIN_LIMIT}`)
+    .max(VALIDATION_LIMITS.PAGINATION.MAX_LIMIT, `Limit cannot exceed ${VALIDATION_LIMITS.PAGINATION.MAX_LIMIT}`)
+    .default(VALIDATION_LIMITS.PAGINATION.DEFAULT_LIMIT),
+
+  offset: z.number()
+    .int("Offset must be a whole number")
+    .min(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET, "Offset cannot be negative")
+    .default(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET),
+});
+
+/* ========================================
+ * Type Exports
+ * ======================================== */
+
+export type AssigneeIdInput = z.infer<typeof assigneeIdInput>;
+export type CreateAssigneeInput = z.infer<typeof createAssigneeInput>;
+export type UpdateAssigneeInput = z.infer<typeof updateAssigneeInput>;
+export type GetAssigneesInput = z.infer<typeof getAssigneesInput>;
 
 /* ========================================
  * Assignee Router Implementation
