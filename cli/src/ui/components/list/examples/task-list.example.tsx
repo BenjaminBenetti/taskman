@@ -46,6 +46,10 @@ export const TaskListExample: React.FC<{
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFilters, setSearchFilters] = useState<Record<string, string[]>>({});
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 10; // Set to 10 for testing
 
   // ================================================
   // Column Definitions
@@ -187,10 +191,10 @@ export const TaskListExample: React.FC<{
   }), []);
 
   // ================================================
-  // Data Filtering
+  // Data Filtering and Pagination
   // ================================================
 
-  const filteredTasks = useMemo(() => {
+  const { filteredTasks, paginatedTasks, pagination } = useMemo(() => {
     let filtered = [...tasks];
 
     // Apply text search
@@ -237,8 +241,28 @@ export const TaskListExample: React.FC<{
       });
     }
 
-    return filtered;
-  }, [tasks, searchQuery, searchFilters]);
+    // Calculate pagination
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const startIndex = currentPage * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedTasks = filtered.slice(startIndex, endIndex);
+
+    const paginationInfo = {
+      page: currentPage,
+      pageSize,
+      totalItems,
+      totalPages,
+      hasNextPage: currentPage < totalPages - 1,
+      hasPreviousPage: currentPage > 0,
+    };
+
+    return {
+      filteredTasks: filtered,
+      paginatedTasks,
+      pagination: paginationInfo,
+    };
+  }, [tasks, searchQuery, searchFilters, currentPage, pageSize]);
 
   // ================================================
   // Event Handlers
@@ -247,6 +271,8 @@ export const TaskListExample: React.FC<{
   const handleSearchChange = (query: string, filters: Record<string, string[]>) => {
     setSearchQuery(query);
     setSearchFilters(filters);
+    // Reset to first page when search changes
+    setCurrentPage(0);
   };
 
   const handleTaskAction = (task: Task, index: number) => {
@@ -260,6 +286,10 @@ export const TaskListExample: React.FC<{
     console.log('Selected tasks:', selectedTasks);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   // ================================================
   // Render
   // ================================================
@@ -267,7 +297,7 @@ export const TaskListExample: React.FC<{
   return (
     <Box flexDirection="column" flexGrow={1}>
       <GenericList<Task>
-        data={filteredTasks}
+        data={paginatedTasks}
         columns={columns}
         loading={loading}
         error={error}
@@ -277,6 +307,10 @@ export const TaskListExample: React.FC<{
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         showSearch={true}
+        
+        // Pagination
+        pagination={pagination}
+        onPaginationChange={handlePageChange}
         
         // Actions
         onItemAction={handleTaskAction}
@@ -364,6 +398,198 @@ export const mockTasks: Task[] = [
     updatedAt: new Date('2024-01-18'),
     creator: { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
     assignee: { id: '1', name: 'John Doe', email: 'john@example.com', isActive: true },
+  },
+  {
+    id: '5',
+    title: 'Refactor user service',
+    description: 'Clean up user service code and improve performance',
+    status: 'TODO',
+    priority: 'MEDIUM',
+    remindAt: new Date('2024-02-05'),
+    createdAt: new Date('2024-01-19'),
+    updatedAt: new Date('2024-01-19'),
+    creator: { id: '4', name: 'Alice Cooper', email: 'alice@example.com' },
+    assignee: { id: '4', name: 'Alice Cooper', email: 'alice@example.com', isActive: true },
+  },
+  {
+    id: '6',
+    title: 'Write API documentation',
+    description: 'Document all REST endpoints with examples and schemas',
+    status: 'IN_PROGRESS',
+    priority: 'LOW',
+    remindAt: null,
+    createdAt: new Date('2024-01-12'),
+    updatedAt: new Date('2024-01-21'),
+    creator: { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
+    assignee: { id: '5', name: 'Charlie Brown', email: 'charlie@example.com', isActive: true },
+  },
+  {
+    id: '7',
+    title: 'Fix search pagination bug',
+    description: 'Search results pagination not working correctly on mobile',
+    status: 'TODO',
+    priority: 'HIGH',
+    remindAt: new Date('2024-01-30'),
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date('2024-01-20'),
+    creator: { id: '3', name: 'Bob Wilson', email: 'bob@example.com' },
+    assignee: { id: '2', name: 'Jane Smith', email: 'jane@example.com', isActive: true },
+  },
+  {
+    id: '8',
+    title: 'Implement dark mode',
+    description: 'Add dark theme option to user preferences',
+    status: 'DONE',
+    priority: 'LOW',
+    remindAt: null,
+    createdAt: new Date('2024-01-08'),
+    updatedAt: new Date('2024-01-22'),
+    creator: { id: '1', name: 'John Doe', email: 'john@example.com' },
+    assignee: { id: '1', name: 'John Doe', email: 'john@example.com', isActive: true },
+  },
+  {
+    id: '9',
+    title: 'Optimize database queries',
+    description: 'Identify and fix slow queries in the analytics module',
+    status: 'IN_PROGRESS',
+    priority: 'URGENT',
+    remindAt: new Date('2024-01-28'),
+    createdAt: new Date('2024-01-17'),
+    updatedAt: new Date('2024-01-23'),
+    creator: { id: '4', name: 'Alice Cooper', email: 'alice@example.com' },
+    assignee: { id: '3', name: 'Bob Wilson', email: 'bob@example.com', isActive: true },
+  },
+  {
+    id: '10',
+    title: 'Create user onboarding flow',
+    description: 'Design and implement step-by-step user onboarding',
+    status: 'TODO',
+    priority: 'MEDIUM',
+    remindAt: null,
+    createdAt: new Date('2024-01-16'),
+    updatedAt: new Date('2024-01-16'),
+    creator: { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
+    assignee: undefined,
+  },
+  {
+    id: '11',
+    title: 'Setup monitoring alerts',
+    description: 'Configure alerts for system health and performance metrics',
+    status: 'DONE',
+    priority: 'HIGH',
+    remindAt: null,
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-24'),
+    creator: { id: '3', name: 'Bob Wilson', email: 'bob@example.com' },
+    assignee: { id: '3', name: 'Bob Wilson', email: 'bob@example.com', isActive: true },
+  },
+  {
+    id: '12',
+    title: 'Implement file upload feature',
+    description: 'Allow users to upload and manage documents',
+    status: 'TODO',
+    priority: 'MEDIUM',
+    remindAt: new Date('2024-02-10'),
+    createdAt: new Date('2024-01-21'),
+    updatedAt: new Date('2024-01-21'),
+    creator: { id: '1', name: 'John Doe', email: 'john@example.com' },
+    assignee: { id: '5', name: 'Charlie Brown', email: 'charlie@example.com', isActive: true },
+  },
+  {
+    id: '13',
+    title: 'Security audit',
+    description: 'Conduct comprehensive security review of the application',
+    status: 'IN_PROGRESS',
+    priority: 'URGENT',
+    remindAt: new Date('2024-01-29'),
+    createdAt: new Date('2024-01-13'),
+    updatedAt: new Date('2024-01-25'),
+    creator: { id: '4', name: 'Alice Cooper', email: 'alice@example.com' },
+    assignee: { id: '4', name: 'Alice Cooper', email: 'alice@example.com', isActive: true },
+  },
+  {
+    id: '14',
+    title: 'Mobile app prototype',
+    description: 'Create initial prototype for mobile companion app',
+    status: 'TODO',
+    priority: 'LOW',
+    remindAt: null,
+    createdAt: new Date('2024-01-22'),
+    updatedAt: new Date('2024-01-22'),
+    creator: { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
+    assignee: undefined,
+  },
+  {
+    id: '15',
+    title: 'Upgrade dependencies',
+    description: 'Update all npm packages to latest stable versions',
+    status: 'DONE',
+    priority: 'MEDIUM',
+    remindAt: null,
+    createdAt: new Date('2024-01-11'),
+    updatedAt: new Date('2024-01-26'),
+    creator: { id: '3', name: 'Bob Wilson', email: 'bob@example.com' },
+    assignee: { id: '1', name: 'John Doe', email: 'john@example.com', isActive: true },
+  },
+  {
+    id: '16',
+    title: 'Implement caching layer',
+    description: 'Add Redis caching to improve API response times',
+    status: 'TODO',
+    priority: 'HIGH',
+    remindAt: new Date('2024-02-03'),
+    createdAt: new Date('2024-01-23'),
+    updatedAt: new Date('2024-01-23'),
+    creator: { id: '1', name: 'John Doe', email: 'john@example.com' },
+    assignee: { id: '3', name: 'Bob Wilson', email: 'bob@example.com', isActive: true },
+  },
+  {
+    id: '17',
+    title: 'User feedback system',
+    description: 'Build in-app feedback collection and management system',
+    status: 'IN_PROGRESS',
+    priority: 'MEDIUM',
+    remindAt: null,
+    createdAt: new Date('2024-01-24'),
+    updatedAt: new Date('2024-01-27'),
+    creator: { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
+    assignee: { id: '2', name: 'Jane Smith', email: 'jane@example.com', isActive: true },
+  },
+  {
+    id: '18',
+    title: 'Performance testing',
+    description: 'Run load tests and identify bottlenecks',
+    status: 'TODO',
+    priority: 'LOW',
+    remindAt: new Date('2024-02-15'),
+    createdAt: new Date('2024-01-25'),
+    updatedAt: new Date('2024-01-25'),
+    creator: { id: '4', name: 'Alice Cooper', email: 'alice@example.com' },
+    assignee: { id: '5', name: 'Charlie Brown', email: 'charlie@example.com', isActive: true },
+  },
+  {
+    id: '19',
+    title: 'Email notification system',
+    description: 'Implement email notifications for task updates and reminders',
+    status: 'DONE',
+    priority: 'MEDIUM',
+    remindAt: null,
+    createdAt: new Date('2024-01-09'),
+    updatedAt: new Date('2024-01-28'),
+    creator: { id: '3', name: 'Bob Wilson', email: 'bob@example.com' },
+    assignee: { id: '4', name: 'Alice Cooper', email: 'alice@example.com', isActive: true },
+  },
+  {
+    id: '20',
+    title: 'Backup and recovery plan',
+    description: 'Implement automated backup system and disaster recovery procedures',
+    status: 'TODO',
+    priority: 'URGENT',
+    remindAt: new Date('2024-02-01'),
+    createdAt: new Date('2024-01-26'),
+    updatedAt: new Date('2024-01-26'),
+    creator: { id: '1', name: 'John Doe', email: 'john@example.com' },
+    assignee: { id: '3', name: 'Bob Wilson', email: 'bob@example.com', isActive: true },
   },
 ];
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, type ReactNode } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Box, Text, useStdout } from 'ink';
 import type { GenericListProps } from './list.types.ts';
 

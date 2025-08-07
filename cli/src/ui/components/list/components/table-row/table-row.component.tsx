@@ -50,8 +50,6 @@ export const TableRow: React.FC<TableRowProps> = ({
     return finalRowStyle.normalColor;
   }, [selected, highlighted, finalRowStyle]);
 
-  const borderStyle = selected ? finalRowStyle.selectedBorder : 'none';
-  const borderColor = selected ? finalRowStyle.selectedBorderColor : 'gray';
 
   // Handle row actions
   const handleRowAction = () => {
@@ -70,8 +68,7 @@ export const TableRow: React.FC<TableRowProps> = ({
     <Box
       flexDirection="row"
       backgroundColor={backgroundColor}
-      borderStyle={borderStyle}
-      borderColor={borderColor}
+      borderStyle={selected ? 'single' : undefined}
       paddingX={selected ? 1 : 0}
     >
       {columns.map((column, columnIndex) => {
