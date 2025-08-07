@@ -2,7 +2,8 @@ import { z } from "zod";
 import { router } from "../../index.ts";
 import { protectedProcedure } from "../../middleware/protectedProcedure.ts";
 import { ChatMessagesService } from "../../../chatMessages/services/chat-messages.service.ts";
-import { VALIDATION_LIMITS } from "../../../shared/constants/validation-limits.ts";
+import { CHAT_MESSAGE_VALIDATION } from "../../../chatMessages/constants/validation.ts";
+import { PAGINATION_LIMITS } from "../../../shared/constants/pagination.ts";
 import { MessageRole } from "../../../generated/prisma/enums.ts";
 
 /* ========================================
@@ -74,8 +75,8 @@ const chatMessageIdInput = z.object({
  */
 const createChatMessageInput = z.object({
   content: z.string()
-    .min(VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MIN_LENGTH, "Message content is required")
-    .max(VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH, `Message content must be ${VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH} characters or less`)
+    .min(CHAT_MESSAGE_VALIDATION.CONTENT_MIN_LENGTH, "Message content is required")
+    .max(CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH, `Message content must be ${CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH} characters or less`)
     .trim(),
 
   role: z.nativeEnum(MessageRole, {
@@ -100,8 +101,8 @@ const updateChatMessageInput = z.object({
   chatMessageId: z.string().uuid("Invalid chat message ID format"),
 
   content: z.string()
-    .min(VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MIN_LENGTH, "Message content cannot be empty")
-    .max(VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH, `Message content must be ${VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH} characters or less`)
+    .min(CHAT_MESSAGE_VALIDATION.CONTENT_MIN_LENGTH, "Message content cannot be empty")
+    .max(CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH, `Message content must be ${CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
 
@@ -127,20 +128,20 @@ const getChatMessagesInput = z.object({
   assigneeId: z.string().uuid("Invalid assignee ID format").optional(),
 
   search: z.string()
-    .max(VALIDATION_LIMITS.CHAT_MESSAGE.SEARCH_MAX_LENGTH, `Search term must be ${VALIDATION_LIMITS.CHAT_MESSAGE.SEARCH_MAX_LENGTH} characters or less`)
+    .max(CHAT_MESSAGE_VALIDATION.SEARCH_MAX_LENGTH, `Search term must be ${CHAT_MESSAGE_VALIDATION.SEARCH_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
 
   limit: z.number()
     .int("Limit must be a whole number")
-    .min(VALIDATION_LIMITS.PAGINATION.MIN_LIMIT, `Limit must be at least ${VALIDATION_LIMITS.PAGINATION.MIN_LIMIT}`)
-    .max(VALIDATION_LIMITS.PAGINATION.MAX_LIMIT, `Limit cannot exceed ${VALIDATION_LIMITS.PAGINATION.MAX_LIMIT}`)
-    .default(VALIDATION_LIMITS.PAGINATION.DEFAULT_LIMIT),
+    .min(PAGINATION_LIMITS.MIN_LIMIT, `Limit must be at least ${PAGINATION_LIMITS.MIN_LIMIT}`)
+    .max(PAGINATION_LIMITS.MAX_LIMIT, `Limit cannot exceed ${PAGINATION_LIMITS.MAX_LIMIT}`)
+    .default(PAGINATION_LIMITS.DEFAULT_LIMIT),
 
   offset: z.number()
     .int("Offset must be a whole number")
-    .min(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET, "Offset cannot be negative")
-    .default(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET),
+    .min(PAGINATION_LIMITS.MIN_OFFSET, "Offset cannot be negative")
+    .default(PAGINATION_LIMITS.MIN_OFFSET),
 
   includeRelations: z.boolean()
     .default(false)

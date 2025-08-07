@@ -5,7 +5,8 @@ import { type Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../prisma/index.ts";
 import { TRPCError } from "@trpc/server";
 import { FieldValidators } from "../../shared/validation/field-validators.ts";
-import { VALIDATION_LIMITS } from "../../shared/constants/validation-limits.ts";
+import { CHAT_MESSAGE_VALIDATION } from "../constants/validation.ts";
+import { PAGINATION_LIMITS } from "../../shared/constants/pagination.ts";
 import { MessageRole } from "../../generated/prisma/enums.ts";
 import type { User } from "../../users/models/user.model.ts";
 
@@ -162,7 +163,7 @@ export class ChatMessagesService {
       // Validate content requirements
       const trimmedContent = content.trim();
       FieldValidators.validateRequired(trimmedContent, 'message content');
-      FieldValidators.validateLength(trimmedContent, 'message content', VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH);
+      FieldValidators.validateLength(trimmedContent, 'message content', CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH);
 
       // Validate role
       this.validateMessageRole(role);
@@ -270,9 +271,9 @@ export class ChatMessagesService {
     // Validate search length if provided
     if (filters?.search) {
       FieldValidators.validateOptionalLength(
-        filters.search, 
-        'search term', 
-        VALIDATION_LIMITS.CHAT_MESSAGE.SEARCH_MAX_LENGTH
+        filters.search,
+        'search term',
+        CHAT_MESSAGE_VALIDATION.SEARCH_MAX_LENGTH
       );
     }
 
@@ -300,7 +301,7 @@ export class ChatMessagesService {
       actor.tenantId,
       {
         ...filters,
-        limit: filters?.limit || VALIDATION_LIMITS.PAGINATION.DEFAULT_LIMIT,
+        limit: filters?.limit || PAGINATION_LIMITS.DEFAULT_LIMIT,
         offset: filters?.offset || 0,
       },
       includeRelations
@@ -369,7 +370,7 @@ export class ChatMessagesService {
       if (updateData.content !== undefined) {
         const trimmedContent = updateData.content.trim();
         FieldValidators.validateRequired(trimmedContent, 'message content');
-        FieldValidators.validateLength(trimmedContent, 'message content', VALIDATION_LIMITS.CHAT_MESSAGE.CONTENT_MAX_LENGTH);
+        FieldValidators.validateLength(trimmedContent, 'message content', CHAT_MESSAGE_VALIDATION.CONTENT_MAX_LENGTH);
         updateData.content = trimmedContent;
       }
 

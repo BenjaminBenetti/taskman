@@ -5,7 +5,8 @@ import { type Prisma } from "../../generated/prisma/client.ts";
 import { prisma } from "../../prisma/index.ts";
 import { TRPCError } from "@trpc/server";
 import { FieldValidators } from "../../shared/validation/field-validators.ts";
-import { VALIDATION_LIMITS } from "../../shared/constants/validation-limits.ts";
+import { ASSIGNEE_VALIDATION } from "../constants/validation.ts";
+import { PAGINATION_LIMITS } from "../../shared/constants/pagination.ts";
 import { type AssigneeFilters } from "../../trpc/routers/assignees/assignee.router.ts";
 import type { User } from "../../users/models/user.model.ts";
 
@@ -81,10 +82,10 @@ export class AssigneesService {
       FieldValidators.validateOptionalEmail(email);
 
       // Validate phone number length if provided
-      FieldValidators.validateOptionalLength(phone, 'phone number', VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH);
+      FieldValidators.validateOptionalLength(phone, 'phone number', ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH);
 
       // Validate notes length if provided
-      FieldValidators.validateOptionalLength(notes, 'notes', VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH);
+      FieldValidators.validateOptionalLength(notes, 'notes', ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH);
 
       /* ========================================
        * Create Assignee Entity
@@ -191,7 +192,7 @@ export class AssigneesService {
         { isActive: 'desc' }, // Active assignees first
         { name: 'asc' },      // Then alphabetical by name
       ],
-      take: filters?.limit || VALIDATION_LIMITS.PAGINATION.DEFAULT_LIMIT,
+      take: filters?.limit || PAGINATION_LIMITS.DEFAULT_LIMIT,
       skip: filters?.offset || 0,
     });
     
@@ -269,12 +270,12 @@ export class AssigneesService {
 
       // Validate phone number length if being updated
       if (updateData.phone !== undefined) {
-        FieldValidators.validateOptionalLength(updateData.phone, 'phone number', VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH);
+        FieldValidators.validateOptionalLength(updateData.phone, 'phone number', ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH);
       }
 
       // Validate notes length if being updated
       if (updateData.notes !== undefined) {
-        FieldValidators.validateOptionalLength(updateData.notes, 'notes', VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH);
+        FieldValidators.validateOptionalLength(updateData.notes, 'notes', ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH);
       }
 
       /* ========================================

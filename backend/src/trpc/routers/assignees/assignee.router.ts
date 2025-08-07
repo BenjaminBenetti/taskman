@@ -2,7 +2,8 @@ import { z } from "zod";
 import { router } from "../../index.ts";
 import { protectedProcedure } from "../../middleware/protectedProcedure.ts";
 import { AssigneesService } from "../../../assignees/services/assignees.service.ts";
-import { VALIDATION_LIMITS } from "../../../shared/constants/validation-limits.ts";
+import { ASSIGNEE_VALIDATION } from "../../../assignees/constants/validation.ts";
+import { PAGINATION_LIMITS } from "../../../shared/constants/pagination.ts";
 
 /* ========================================
  * Validation Schemas
@@ -68,7 +69,7 @@ const assigneeIdInput = z.object({
 const createAssigneeInput = z.object({
   name: z.string()
     .min(1, "Assignee name is required")
-    .max(VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH, `Assignee name must be ${VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.NAME_MAX_LENGTH, `Assignee name must be ${ASSIGNEE_VALIDATION.NAME_MAX_LENGTH} characters or less`)
     .trim(),
 
   email: z.string()
@@ -77,12 +78,12 @@ const createAssigneeInput = z.object({
     .transform(val => val || null),
 
   phone: z.string()
-    .max(VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH, `Phone number must be ${VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH, `Phone number must be ${ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH} characters or less`)
     .optional()
     .transform(val => val || null),
 
   notes: z.string()
-    .max(VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH, `Notes must be ${VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH, `Notes must be ${ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH} characters or less`)
     .optional()
     .transform(val => val || null),
 
@@ -100,7 +101,7 @@ const updateAssigneeInput = z.object({
 
   name: z.string()
     .min(1, "Assignee name cannot be empty")
-    .max(VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH, `Assignee name must be ${VALIDATION_LIMITS.ASSIGNEE.NAME_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.NAME_MAX_LENGTH, `Assignee name must be ${ASSIGNEE_VALIDATION.NAME_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
 
@@ -110,12 +111,12 @@ const updateAssigneeInput = z.object({
     .transform(val => val === undefined ? undefined : val || null),
 
   phone: z.string()
-    .max(VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH, `Phone number must be ${VALIDATION_LIMITS.ASSIGNEE.PHONE_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH, `Phone number must be ${ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH} characters or less`)
     .nullish()
     .transform(val => val === undefined ? undefined : val || null),
 
   notes: z.string()
-    .max(VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH, `Notes must be ${VALIDATION_LIMITS.ASSIGNEE.NOTES_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH, `Notes must be ${ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH} characters or less`)
     .nullish()
     .transform(val => val === undefined ? undefined : val || null),
 
@@ -135,20 +136,20 @@ const getAssigneesInput = z.object({
   creatorId: z.string().uuid("Invalid creator ID format").optional(),
 
   search: z.string()
-    .max(VALIDATION_LIMITS.ASSIGNEE.SEARCH_MAX_LENGTH, `Search term must be ${VALIDATION_LIMITS.ASSIGNEE.SEARCH_MAX_LENGTH} characters or less`)
+    .max(ASSIGNEE_VALIDATION.SEARCH_MAX_LENGTH, `Search term must be ${ASSIGNEE_VALIDATION.SEARCH_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
 
   limit: z.number()
     .int("Limit must be a whole number")
-    .min(VALIDATION_LIMITS.PAGINATION.MIN_LIMIT, `Limit must be at least ${VALIDATION_LIMITS.PAGINATION.MIN_LIMIT}`)
-    .max(VALIDATION_LIMITS.PAGINATION.MAX_LIMIT, `Limit cannot exceed ${VALIDATION_LIMITS.PAGINATION.MAX_LIMIT}`)
-    .default(VALIDATION_LIMITS.PAGINATION.DEFAULT_LIMIT),
+    .min(PAGINATION_LIMITS.MIN_LIMIT, `Limit must be at least ${PAGINATION_LIMITS.MIN_LIMIT}`)
+    .max(PAGINATION_LIMITS.MAX_LIMIT, `Limit cannot exceed ${PAGINATION_LIMITS.MAX_LIMIT}`)
+    .default(PAGINATION_LIMITS.DEFAULT_LIMIT),
 
   offset: z.number()
     .int("Offset must be a whole number")
-    .min(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET, "Offset cannot be negative")
-    .default(VALIDATION_LIMITS.PAGINATION.MIN_OFFSET),
+    .min(PAGINATION_LIMITS.MIN_OFFSET, "Offset cannot be negative")
+    .default(PAGINATION_LIMITS.MIN_OFFSET),
 });
 
 /* ========================================

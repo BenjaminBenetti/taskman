@@ -3,6 +3,8 @@ import { router } from "../../index.ts";
 import { protectedProcedure } from "../../middleware/protectedProcedure.ts";
 import { TasksService } from "../../../tasks/services/tasks.service.ts";
 import { TaskStatus, Priority } from "../../../generated/prisma/enums.ts";
+import { PAGINATION_LIMITS } from "../../../shared/constants/pagination.ts";
+import { TASK_VALIDATION } from "../../../tasks/constants/validation.ts";
 
 /* ========================================
  * Validation Schemas
@@ -31,10 +33,10 @@ const prioritySchema = z.nativeEnum(Priority);
 const createTaskInput = z.object({
   title: z.string()
     .min(1, "Task title is required")
-    .max(255, "Task title must be 255 characters or less")
+    .max(TASK_VALIDATION.TITLE_MAX_LENGTH, `Task title must be ${TASK_VALIDATION.TITLE_MAX_LENGTH} characters or less`)
     .trim(),
   description: z.string()
-    .max(2000, "Description must be 2000 characters or less")
+    .max(TASK_VALIDATION.DESCRIPTION_MAX_LENGTH, `Description must be ${TASK_VALIDATION.DESCRIPTION_MAX_LENGTH} characters or less`)
     .optional()
     .transform(val => val || null),
   status: taskStatusSchema.default(TaskStatus.PENDING),
@@ -65,11 +67,11 @@ const updateTaskInput = z.object({
   taskId: z.string().uuid("Invalid task ID format"),
   title: z.string()
     .min(1, "Task title cannot be empty")
-    .max(255, "Task title must be 255 characters or less")
+    .max(TASK_VALIDATION.TITLE_MAX_LENGTH, `Task title must be ${TASK_VALIDATION.TITLE_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
   description: z.string()
-    .max(2000, "Description must be 2000 characters or less")
+    .max(TASK_VALIDATION.DESCRIPTION_MAX_LENGTH, `Description must be ${TASK_VALIDATION.DESCRIPTION_MAX_LENGTH} characters or less`)
     .nullish()
     .transform(val => val === undefined ? undefined : val || null),
   status: taskStatusSchema.optional(),
@@ -103,18 +105,18 @@ const getTasksInput = z.object({
   creatorId: z.string().uuid("Invalid creator ID format").optional(),
   dueBefore: z.coerce.date().optional(),
   search: z.string()
-    .max(100, "Search term must be 100 characters or less")
+    .max(TASK_VALIDATION.SEARCH_MAX_LENGTH, `Search term must be ${TASK_VALIDATION.SEARCH_MAX_LENGTH} characters or less`)
     .trim()
     .optional(),
   limit: z.number()
     .int("Limit must be a whole number")
-    .min(1, "Limit must be at least 1")
-    .max(100, "Limit cannot exceed 100")
-    .default(50),
+    .min(PAGINATION_LIMITS.MIN_LIMIT, `Limit must be at least ${PAGINATION_LIMITS.MIN_LIMIT}`)
+    .max(PAGINATION_LIMITS.MAX_LIMIT, `Limit cannot exceed ${PAGINATION_LIMITS.MAX_LIMIT}`)
+    .default(PAGINATION_LIMITS.DEFAULT_LIMIT),
   offset: z.number()
     .int("Offset must be a whole number")
-    .min(0, "Offset cannot be negative")
-    .default(0),
+    .min(PAGINATION_LIMITS.MIN_OFFSET, "Offset cannot be negative")
+    .default(PAGINATION_LIMITS.MIN_OFFSET),
 });
 
 /**
