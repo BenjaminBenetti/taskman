@@ -13,7 +13,7 @@ import { TaskListUsageExample } from '../../components/list/examples/task-list.e
  */
 export const TasksPage: React.FC<TasksPageProps> = ({ children }: TasksPageProps) => {
   return (
-    <Box flexDirection="column" padding={1} flexGrow={1}>      
+    <Box flexDirection="column" flexGrow={1}>      
       {/* Task List with GenericList Component */}
       <TaskListUsageExample />
       

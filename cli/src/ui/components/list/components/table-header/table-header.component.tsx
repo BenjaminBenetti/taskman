@@ -98,14 +98,6 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
         </Text>
       </Box>
 
-      {/* Keyboard Help (when focused and interactive) */}
-      {interactive && isFocused && (
-        <Box marginTop={1}>
-          <Text color="gray" dimColor>
-            ← → Navigate columns • Enter/Space to sort • Esc to exit
-          </Text>
-        </Box>
-      )}
     </Box>
   );
 };

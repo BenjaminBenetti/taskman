@@ -205,14 +205,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </Box>
       )}
 
-      {/* Filter Help */}
-      {config.shortcuts && config.shortcuts.length > 0 && isFocused && !showSuggestions && (
-        <Box marginTop={1}>
-          <Text color="gray" dimColor>
-            Filters: {config.shortcuts.map(s => s.key).join(', ')} • Ctrl+Space for suggestions
-          </Text>
-        </Box>
-      )}
     </Box>
   );
 };

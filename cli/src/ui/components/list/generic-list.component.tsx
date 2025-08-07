@@ -2,6 +2,9 @@ import React, { useMemo, useEffect } from 'react';
 import { Box, Text, useStdout } from 'ink';
 import type { GenericListProps } from './list.types.ts';
 
+// Import global footer help hook
+import { useFooterHelp } from '../../hooks/use-global-footer-help.hook.tsx';
+
 // Import sub-components
 import { SearchBar } from './components/search-bar/search-bar.component.tsx';
 import { TableHeader } from './components/table-header/table-header.component.tsx';
@@ -60,7 +63,7 @@ export function GenericList<TData = unknown>({
   showSearch = true,
   showFooter = true,
   showHeaders = true,
-  minHeight = 10,
+  minHeight = 0,
   maxHeight,
 }: GenericListProps<TData>) {
   // ================================================
@@ -121,6 +124,16 @@ export function GenericList<TData = unknown>({
     onItemAction,
     enabled: !loading && !error && data.length > 0,
   });
+
+  // ================================================
+  // Global Footer Help Text
+  // ================================================
+  
+  // Set footer help text when list is focused and interactive
+  useFooterHelp(
+    "↑↓ Navigate • Space Select • Enter Action • ←→ Change page • Esc Exit",
+    keyboardHandlers.hasFocus && !loading && !error && data.length > 0
+  );
 
   // ================================================
   // Event Handler Integration
@@ -266,27 +279,23 @@ export function GenericList<TData = unknown>({
     <Box flexDirection="column" minHeight={minHeight} maxHeight={containerHeight}>
       {/* Search Bar */}
       {showSearch && searchConfig && (
-        <Box marginBottom={1}>
-          <SearchBar
-            query={searchQuery}
-            config={searchConfig}
-            onChange={handleSearchChange}
-            terminalWidth={terminalWidth}
-          />
-        </Box>
+        <SearchBar
+          query={searchQuery}
+          config={searchConfig}
+          onChange={handleSearchChange}
+          terminalWidth={terminalWidth}
+        />
       )}
 
       {/* Table Header */}
       {showHeaders && (
-        <Box marginBottom={1}>
-          <TableHeader
-            columns={columns}
-            sort={sort}
-            onSortChange={handleSortChange}
-            columnWidths={columnWidths}
-            terminalWidth={terminalWidth}
-          />
-        </Box>
+        <TableHeader
+          columns={columns}
+          sort={sort}
+          onSortChange={handleSortChange}
+          columnWidths={columnWidths}
+          terminalWidth={terminalWidth}
+        />
       )}
 
       {/* Table Body */}
@@ -344,14 +353,6 @@ export function GenericList<TData = unknown>({
         />
       )}
 
-      {/* Keyboard Help */}
-      {keyboardHandlers.hasFocus && (
-        <Box marginTop={1} justifyContent="center">
-          <Text color="gray" dimColor>
-            ↑↓ Navigate • Space Select • Enter Action • ←→ Change page • Esc Exit
-          </Text>
-        </Box>
-      )}
     </Box>
   );
 }

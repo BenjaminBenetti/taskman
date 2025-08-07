@@ -283,7 +283,7 @@ export const TaskListExample: React.FC<{
 
   const handleSelectionChange = (selectedKeys: Set<React.Key>, selectedTasks: Task[]) => {
     // Handle multi-select if needed
-    console.log('Selected tasks:', selectedTasks);
+    // TODO: Implement multi-select handling
   };
 
   const handlePageChange = (page: number) => {
@@ -326,7 +326,6 @@ export const TaskListExample: React.FC<{
         // Layout
         showHeaders={true}
         showFooter={true}
-        minHeight={15}
         
         // Custom components
         emptyComponent={
@@ -605,13 +604,13 @@ export const TaskListUsageExample: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleTaskSelect = (task: Task) => {
-    console.log('Task selected:', task);
     // Here you would navigate to task detail or open edit modal
+    // TODO: Implement task selection handling
   };
 
   return (
-    <Box flexDirection="column" padding={1}>
-      <Box marginBottom={1}>
+    <Box flexDirection="column">
+      <Box>
         <Text bold color="greenBright">
           Task Management
         </Text>

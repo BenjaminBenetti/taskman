@@ -35,7 +35,7 @@ export const ListFooter: React.FC<ListFooterProps> = ({
     distribution: 'space-between',
     stackOnNarrow: true,
     narrowThreshold: 60,
-    padding: 1,
+    padding: 0,
   }), []);
 
   const isNarrowScreen = terminalWidth < layout.narrowThreshold!;
@@ -131,7 +131,7 @@ export const ListFooter: React.FC<ListFooterProps> = ({
   }
 
   return (
-    <Box flexDirection="column" marginTop={1}>
+    <Box flexDirection="column">
       {/* Separator Line */}
       <Box>
         <Text color="gray">
@@ -159,7 +159,7 @@ export const ListFooter: React.FC<ListFooterProps> = ({
 
       {/* Keyboard Help */}
       {isFocused && paginationEnabled && (
-        <Box justifyContent="center" marginTop={1}>
+        <Box justifyContent="center">
           <Text color="gray" dimColor>
             ← → Navigate pages • ↑ ↓ Change page size • Home/End First/Last page
           </Text>
