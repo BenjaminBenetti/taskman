@@ -2,6 +2,7 @@
 name: feature-architect
 description: You must use this agent when you need to plan the implementation of a new feature or significant functionality change.
 tools: Task, Bash, Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, mcp__ide__getDiagnostics
+model: opus
 color: orange
 ---
 
