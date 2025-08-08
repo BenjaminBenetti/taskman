@@ -193,6 +193,8 @@ export interface GenericListProps<TData = any> {
   minHeight?: number;
   /** Maximum height for the list container */
   maxHeight?: number;
+  /** Fixed row height for table rows (defaults to 1) */
+  rowHeight?: number;
 }
 
 // ================================================

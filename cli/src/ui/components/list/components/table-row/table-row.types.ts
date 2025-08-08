@@ -31,6 +31,8 @@ export interface TableRowProps<TData = any> {
   columnGap?: number;
   /** Custom row styling */
   rowStyle?: RowStyle;
+  /** Fixed row height in terminal rows (defaults to 1) */
+  rowHeight?: number;
 }
 
 /**
@@ -55,6 +57,8 @@ export interface TableCellProps<TData = any> {
   rowHighlighted?: boolean;
   /** Whether this cell has focus */
   cellFocused?: boolean;
+  /** Fixed row height in terminal rows (inherited from TableRow) */
+  rowHeight?: number;
 }
 
 /**

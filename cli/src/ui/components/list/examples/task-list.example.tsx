@@ -301,6 +301,7 @@ export const TaskListExample: React.FC<{
         columns={columns}
         loading={loading}
         error={error}
+        rowHeight={2}
         
         // Search
         searchConfig={searchConfig}

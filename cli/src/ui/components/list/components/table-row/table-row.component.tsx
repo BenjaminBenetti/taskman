@@ -28,6 +28,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   onItemAction,
   columnGap = 1,
   rowStyle = DEFAULT_ROW_STYLE,
+  rowHeight = 1,
 }: TableRowProps) => {
   // Determine row styling based on state
   const finalRowStyle = useMemo(() => ({
@@ -86,6 +87,7 @@ export const TableRow: React.FC<TableRowProps> = ({
             width={width}
             rowSelected={selected}
             rowHighlighted={highlighted}
+            rowHeight={rowHeight}
           />
         );
       })}
@@ -110,6 +112,7 @@ const TableCell: React.FC<TableCellProps> = ({
   rowSelected = false,
   rowHighlighted = false,
   cellFocused = false,
+  rowHeight = 1,
 }: TableCellProps) => {
   // Create render context
   const renderContext: CellRenderContext = {
@@ -142,6 +145,7 @@ const TableCell: React.FC<TableCellProps> = ({
   const alignment = column.align || 'left';
   const paddingX = 1;
   const availableWidth = Math.max(1, width - (paddingX * 2));
+  const lineHeight = Math.max(1, (rowHeight ?? 1));
 
   return (
     <Box
@@ -149,15 +153,21 @@ const TableCell: React.FC<TableCellProps> = ({
       paddingX={paddingX}
       justifyContent={getJustifyContent(alignment)}
       alignItems="center"
-      minHeight={1}
+      height={lineHeight}
     >
       {typeof cellContent === 'string' || typeof cellContent === 'number' ? (
-        <Text wrap="truncate">
-          {truncateCellText(String(cellContent), availableWidth)}
-        </Text>
+        lineHeight > 1 ? (
+          <Box width={availableWidth} height={lineHeight} overflow="hidden">
+            <Text wrap="wrap">{String(cellContent)}</Text>
+          </Box>
+        ) : (
+          <Text wrap="truncate">
+            {truncateCellText(String(cellContent), availableWidth)}
+          </Text>
+        )
       ) : (
         // Render custom React elements
-        <Box width={availableWidth}>
+        <Box width={availableWidth} height={lineHeight} overflow="hidden">
           {cellContent}
         </Box>
       )}

@@ -65,6 +65,7 @@ export function GenericList<TData = unknown>({
   showHeaders = true,
   minHeight = 0,
   maxHeight,
+  rowHeight = 1,
 }: GenericListProps<TData>) {
   // ================================================
   // Terminal Dimensions
@@ -321,6 +322,7 @@ export function GenericList<TData = unknown>({
                 selected={isSelected}
                 highlighted={isHighlighted}
                 even={index % 2 === 0}
+                rowHeight={rowHeight}
                 onSelectionChange={(selected: boolean) => {
                   const newSelection = new Set(selection);
                   if (selected) {
