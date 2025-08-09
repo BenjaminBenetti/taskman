@@ -49,7 +49,7 @@ export const TaskListExample: React.FC<{
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10; // Set to 10 for testing
+  const [pageSize, setPageSize] = useState(10); // default 10
 
   // ================================================
   // Column Definitions
@@ -194,7 +194,7 @@ export const TaskListExample: React.FC<{
   // Data Filtering and Pagination
   // ================================================
 
-  const { filteredTasks, paginatedTasks, pagination } = useMemo(() => {
+  const { filteredTasks, pagination } = useMemo(() => {
     let filtered = [...tasks];
 
     // Apply text search
@@ -241,25 +241,22 @@ export const TaskListExample: React.FC<{
       });
     }
 
-    // Calculate pagination
+    // Calculate pagination info only (GenericList handles slicing)
     const totalItems = filtered.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
-    const startIndex = currentPage * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedTasks = filtered.slice(startIndex, endIndex);
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const clampedPage = Math.max(0, Math.min(currentPage, totalPages - 1));
 
     const paginationInfo = {
-      page: currentPage,
+      page: clampedPage,
       pageSize,
       totalItems,
       totalPages,
-      hasNextPage: currentPage < totalPages - 1,
-      hasPreviousPage: currentPage > 0,
+      hasNextPage: clampedPage < totalPages - 1,
+      hasPreviousPage: clampedPage > 0,
     };
 
     return {
       filteredTasks: filtered,
-      paginatedTasks,
       pagination: paginationInfo,
     };
   }, [tasks, searchQuery, searchFilters, currentPage, pageSize]);
@@ -286,8 +283,9 @@ export const TaskListExample: React.FC<{
     // TODO: Implement multi-select handling
   };
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = (page: number, newPageSize: number) => {
     setCurrentPage(page);
+    if (newPageSize !== pageSize) setPageSize(newPageSize);
   };
 
   // ================================================
@@ -297,7 +295,7 @@ export const TaskListExample: React.FC<{
   return (
     <Box flexDirection="column" flexGrow={1}>
       <GenericList<Task>
-        data={paginatedTasks}
+        data={filteredTasks}
         columns={columns}
         loading={loading}
         error={error}

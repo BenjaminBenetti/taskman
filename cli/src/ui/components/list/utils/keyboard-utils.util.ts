@@ -69,8 +69,9 @@ export const DEFAULT_KEY_BINDINGS: KeyBindings = {
   deselectAll: ['ctrl+d'],
   toggleSelect: ['space'],
   triggerAction: ['return', 'enter'],
-  nextPage: ['ctrl+rightArrow', 'n'],
-  previousPage: ['ctrl+leftArrow', 'p'],
+  // Include plain left/right arrows so users can change pages while focused in the list body
+  nextPage: ['rightArrow', 'ctrl+rightArrow', 'n'],
+  previousPage: ['leftArrow', 'ctrl+leftArrow', 'p'],
   firstPage: ['ctrl+home'],
   lastPage: ['ctrl+end'],
 };
