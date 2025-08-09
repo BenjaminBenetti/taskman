@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect } from 'react';
-import { Box, Text, useStdout } from 'ink';
+import { Box, Text, useStdout, useFocus } from 'ink';
 import type { GenericListProps } from './list.types.ts';
 
 // Import global footer help hook
@@ -23,6 +23,25 @@ import { useColumnWidth } from './hooks/use-column-width.hook.tsx';
 // ================================================
 // Generic List Component
 // ================================================
+
+/**
+ * Focus boundary for the list body so keyboard navigation only activates when the
+ * list items area is focused (prevents an extra invisible focus stop).
+ */
+type ListBodyFocusBoundaryProps = { onFocusChange: (focused: boolean) => void; children: React.ReactNode };
+const ListBodyFocusBoundary: React.FC<ListBodyFocusBoundaryProps> = ({ onFocusChange, children }: ListBodyFocusBoundaryProps) => {
+
+  const { isFocused } = useFocus({ autoFocus: false });
+  useEffect(() => {
+    onFocusChange(isFocused);
+  }, [isFocused, onFocusChange]);
+
+  return (
+    <Box flexDirection="column" flexGrow={1} flexShrink={1} overflow="hidden">
+      {children}
+    </Box>
+  );
+};
 
 /**
  * Generic list component that orchestrates all sub-components
@@ -300,7 +319,7 @@ export function GenericList<TData = unknown>({
       )}
 
       {/* Table Body */}
-      <Box flexDirection="column" flexGrow={1} flexShrink={1} overflow="hidden">
+      <ListBodyFocusBoundary onFocusChange={keyboardHandlers.setFocus}>
         <GridLayout
           columns={columns}
           terminalWidth={terminalWidth}
@@ -340,7 +359,7 @@ export function GenericList<TData = unknown>({
             );
           })}
         </GridLayout>
-      </Box>
+      </ListBodyFocusBoundary>
 
       {/* Footer with Pagination */}
       {showFooter && (

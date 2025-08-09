@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { useInput, useFocus } from 'ink';
+import { useState, useCallback } from 'react';
+import { useInput } from 'ink';
 import type { ListKeyboardHandlers, ListPagination, ItemActionHandler } from '../list.types.ts';
 import type { Key } from 'react';
 import { matchesKey, mergeKeyBindings, type KeyBindings } from '../utils/keyboard-utils.util.ts';
@@ -12,7 +12,7 @@ import { matchesKey, mergeKeyBindings, type KeyBindings } from '../utils/keyboar
  * Hook for managing keyboard navigation within the list component
  * Provides keyboard shortcuts for navigation, selection, pagination, and actions
  */
-export const useListKeyboard = <TData = any>(options: {
+export const useListKeyboard = <TData = unknown>(options: {
   /** Current list data */
   data: TData[];
   /** Current highlighted index */
@@ -54,15 +54,9 @@ export const useListKeyboard = <TData = any>(options: {
   } = options;
 
   const [hasFocus, setHasFocus] = useState(false);
-  const { isFocused } = useFocus({ autoFocus: false });
 
   // Merge with default key bindings
   const finalKeyBindings: KeyBindings = mergeKeyBindings(keyBindings);
-
-  // Sync focus state with Ink's focus
-  useEffect(() => {
-    setHasFocus(isFocused);
-  }, [isFocused]);
 
   // Calculate current page bounds
   const currentPageStart = pagination.page * pagination.pageSize;
