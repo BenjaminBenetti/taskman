@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useInput, useFocus } from 'ink';
-import type { TableHeaderProps, HeaderCellProps, SortIndicator } from './table-header.types.ts';
-import type { ListSort } from '../../list.types.ts';
+import type { TableHeaderProps, HeaderCellProps } from './table-header.types.ts';
+// import type { ListSort } from '../../list.types.ts';
 
 // ================================================
 // Table Header Component
@@ -58,16 +58,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
 
     onSortChange({ column: columnKey, direction: newDirection });
   };
-
-  // Sort indicator configuration
-  const sortIndicator: SortIndicator = {
-    ascIcon: '↑',
-    descIcon: '↓',
-    neutralIcon: '↕',
-    activeColor: 'blue',
-    inactiveColor: 'gray',
-  };
-
+  
   return (
     <Box flexDirection="column">
       {/* Header Row */}
@@ -135,9 +126,9 @@ const HeaderCell: React.FC<HeaderCellProps> = ({
   }
 
   // Calculate text width (accounting for sort indicator and padding)
-  const iconWidth = sortable ? 2 : 0; // Space for sort icon
+  const iconSpace = sortable ? 2 : 0; // 1 char + 1 space margin
   const paddingWidth = 2; // Left and right padding
-  const textWidth = Math.max(1, width - iconWidth - paddingWidth);
+  const textWidth = Math.max(1, width - iconSpace - paddingWidth);
 
   // Truncate text if necessary
   const displayText = truncateText(column.label, textWidth);
@@ -148,10 +139,11 @@ const HeaderCell: React.FC<HeaderCellProps> = ({
       borderStyle={focused ? 'double' : 'single'}
       borderColor={focused ? 'blue' : 'gray'}
       paddingX={1}
-      justifyContent="space-between"
+      flexDirection="row"
+      alignItems="center"
     >
-      <Box flexDirection="row" alignItems="center" width="100%">
-        {/* Column Label */}
+      {/* Column Label constrained to computed width so it can't push the icon */}
+      <Box width={textWidth} overflow="hidden">
         <Text
           bold={focused}
           color={focused ? 'blueBright' : 'white'}
@@ -159,16 +151,14 @@ const HeaderCell: React.FC<HeaderCellProps> = ({
         >
           {displayText}
         </Text>
-
-        {/* Sort Indicator */}
-        {sortable && (
-          <Box marginLeft={1}>
-            <Text color={sortColor}>
-              {sortIcon}
-            </Text>
-          </Box>
-        )}
       </Box>
+
+      {/* Sort Indicator fixed at the right */}
+      {sortable && (
+        <Box width={1} marginLeft={1} alignItems="center" justifyContent="flex-end">
+          <Text color={sortColor}>{sortIcon}</Text>
+        </Box>
+      )}
     </Box>
   );
 };

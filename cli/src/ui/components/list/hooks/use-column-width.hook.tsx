@@ -30,6 +30,16 @@ export const useColumnWidth = (
     reservedWidth = 4,
   } = options;
 
+  // Compute the minimum width needed to display a header label on a single line
+  const headerMin = (col: ListColumn): number => {
+    const labelLength = (col.label ?? '').length;
+    const iconWidth = col.sortable ? 2 : 0; // width for sort icon + its left margin
+    const paddingWidth = 2; // left + right padding used in header cells
+    const borderWidth = 2; // Ink box border left + right
+    return Math.max(1, labelLength + iconWidth + paddingWidth + borderWidth);
+  };
+
+
   return useMemo(() => {
     if (columns.length === 0) {
       return {
@@ -41,12 +51,14 @@ export const useColumnWidth = (
 
     // Available width after accounting for gaps and reserved space
     const availableWidth = Math.max(
-      terminalWidth - reservedWidth - (columnGap * (columns.length - 1)),
-      columns.length * minColumnWidth
+      0,
+      terminalWidth - reservedWidth - (columnGap * (columns.length - 1))
     );
 
     const columnWidths: number[] = [];
     let totalUsedWidth = 0;
+
+
 
     // Phase 1: Calculate fixed-width columns
     const fixedColumns: { index: number; width: number }[] = [];
@@ -55,16 +67,11 @@ export const useColumnWidth = (
     columns.forEach((column, index) => {
       if (typeof column.width === 'number') {
         // Fixed width column - respect min/max constraints
-        const constrainedWidth = Math.max(
-          minColumnWidth,
-          Math.min(maxColumnWidth, column.width)
-        );
-        
-        // Further constrain by column-specific min/max
-        const finalWidth = Math.max(
-          column.minWidth || minColumnWidth,
-          Math.min(column.maxWidth || maxColumnWidth, constrainedWidth)
-        );
+        // Clamp requested width to global bounds first
+        const upper = Math.min(maxColumnWidth, column.maxWidth ?? maxColumnWidth);
+        const lower = Math.max(minColumnWidth, column.minWidth ?? minColumnWidth, headerMin(column));
+        const requested = typeof column.width === 'number' ? column.width : lower;
+        const finalWidth = Math.min(upper, Math.max(lower, requested));
 
         fixedColumns.push({ index, width: finalWidth });
         columnWidths[index] = finalWidth;
@@ -82,12 +89,12 @@ export const useColumnWidth = (
 
     if (flexColumnCount > 0) {
       const baseFlexWidth = Math.floor(remainingWidth / flexColumnCount);
-      let extraWidth = remainingWidth % flexColumnCount;
+      const extraWidth = remainingWidth % flexColumnCount;
 
       flexColumns.forEach(({ index, column }, flexIndex) => {
         // Base width for this flex column
         let flexWidth = baseFlexWidth;
-        
+
         // Distribute extra width to first few columns
         if (flexIndex < extraWidth) {
           flexWidth += 1;
@@ -96,7 +103,8 @@ export const useColumnWidth = (
         // Apply column-specific constraints
         const minWidth = Math.max(
           column.minWidth || minColumnWidth,
-          minColumnWidth
+          minColumnWidth,
+          headerMin(column)
         );
         const maxWidth = Math.min(
           column.maxWidth || maxColumnWidth,
