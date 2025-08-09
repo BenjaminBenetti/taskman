@@ -1,12 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Box, Text, useInput, useFocus } from 'ink';
-import type { 
-  ListFooterProps, 
-  PaginationControls, 
+import type {
+  ListFooterProps,
   FooterLayout,
-  FooterSection 
+  FooterSection
 } from './list-footer.types.ts';
-import type { ListPagination, PaginationChangeHandler } from '../../list.types.ts';
+import type { ListPagination } from '../../list.types.ts';
+import { useFooterHelp } from '../../../../hooks/use-global-footer-help.hook.tsx';
 
 // ================================================
 // List Footer Component
@@ -27,7 +27,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
   showSelection = true,
   customContent,
 }: ListFooterProps) => {
-  const [focusedControl, setFocusedControl] = useState<string | null>(null);
   const { isFocused } = useFocus({ autoFocus: false });
 
   // Calculate layout based on available width
@@ -40,8 +39,11 @@ export const ListFooter: React.FC<ListFooterProps> = ({
 
   const isNarrowScreen = terminalWidth < layout.narrowThreshold!;
 
+  // Ensure global help displays when footer is focused
+  useFooterHelp('← → Navigate pages • ↑ ↓ Change page size • Home/End First/Last page', isFocused && paginationEnabled);
+
   // Handle keyboard navigation
-  useInput((input, key) => {
+  useInput((_, key) => {
     if (!isFocused || !paginationEnabled) return;
 
     if (key.leftArrow && pagination.hasPreviousPage) {
@@ -56,10 +58,10 @@ export const ListFooter: React.FC<ListFooterProps> = ({
       // Decrease page size
       const newPageSize = Math.max(5, pagination.pageSize - 10);
       onPaginationChange(pagination.page, newPageSize);
-    } else if ((key as any).home) {
+    } else if (hasKeyFlag(key, 'home')) {
       // Go to first page
       onPaginationChange(0, pagination.pageSize);
-    } else if ((key as any).end) {
+    } else if (hasKeyFlag(key, 'end')) {
       // Go to last page
       onPaginationChange(pagination.totalPages - 1, pagination.pageSize);
     }
@@ -104,7 +106,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
         content: (
           <PaginationSection
             pagination={pagination}
-            onPaginationChange={onPaginationChange}
             focused={isFocused}
           />
         ),
@@ -221,11 +222,9 @@ const InfoSection: React.FC<{
  */
 const PaginationSection: React.FC<{
   pagination: ListPagination;
-  onPaginationChange: PaginationChangeHandler;
   focused: boolean;
-}> = ({ pagination, onPaginationChange, focused }: {
+}> = ({ pagination, focused }: {
   pagination: ListPagination;
-  onPaginationChange: PaginationChangeHandler;
   focused: boolean;
 }) => {
   const { page, totalPages, pageSize, hasNextPage, hasPreviousPage } = pagination;
@@ -239,7 +238,7 @@ const PaginationSection: React.FC<{
       </Text>
 
       <Box marginLeft={1} marginRight={1}>
-        <Text color="gray">
+        <Text color={focused ? 'blueBright' : 'gray'}>
           Page {currentPage} of {totalPages}
         </Text>
       </Box>
@@ -251,7 +250,7 @@ const PaginationSection: React.FC<{
 
       {/* Page Size Info */}
       <Box marginLeft={2}>
-        <Text color="gray">
+        <Text color={focused ? 'blue' : 'gray'}>
           ({pageSize}/page)
         </Text>
       </Box>
@@ -275,4 +274,11 @@ function getJustifyContent(align?: string): 'flex-start' | 'center' | 'flex-end'
     default:
       return 'flex-start';
   }
+}
+
+/**
+ * Safely read uncommon key flags (home/end) from Ink's key object
+ */
+function hasKeyFlag(k: unknown, name: string): boolean {
+  return typeof k === 'object' && k !== null && Boolean((k as Record<string, boolean>)[name]);
 }
