@@ -87,13 +87,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }: Da
 
   const ActivePageComponent = pageComponents[activeTab];
 
+  // Adjust height by 1 row to account for footer top border so content fits without clipping
+  const visibleHeight = Math.max((terminalSize.height || 0) - 1, 1);
+
   return (
     <GlobalFooterHelpProvider>
-      <Box 
-        flexDirection="column" 
-        height={terminalSize.height} 
+      <Box
+        flexDirection="column"
+        height={visibleHeight}
         width={terminalSize.width}
-        minHeight={terminalSize.height}
+        minHeight={visibleHeight}
         minWidth={terminalSize.width}
       >
         {/* Header Section - Fixed at top */}
