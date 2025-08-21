@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
-import { Box, Text, useInput, useFocus } from 'ink';
+import { Box, Text } from 'ink';
 import type {
   ListFooterProps,
   FooterLayout,
   FooterSection
 } from './list-footer.types.ts';
 import type { ListPagination } from '../../list.types.ts';
-import { useFooterHelp } from '../../../../hooks/use-global-footer-help.hook.tsx';
 
 // ================================================
 // List Footer Component
@@ -27,8 +26,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
   showSelection = true,
   customContent,
 }: ListFooterProps) => {
-  const { isFocused } = useFocus({ autoFocus: false });
-
   // Calculate layout based on available width
   const layout: FooterLayout = useMemo(() => ({
     distribution: 'space-between',
@@ -38,34 +35,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
   }), []);
 
   const isNarrowScreen = terminalWidth < layout.narrowThreshold!;
-
-  // Ensure global help displays when footer is focused
-  useFooterHelp('← → Navigate pages • ↑ ↓ Change page size • Home/End First/Last page', isFocused && paginationEnabled);
-
-  // Handle keyboard navigation
-  useInput((_, key) => {
-    if (!isFocused || !paginationEnabled) return;
-
-    if (key.leftArrow && pagination.hasPreviousPage) {
-      onPaginationChange(pagination.page - 1, pagination.pageSize);
-    } else if (key.rightArrow && pagination.hasNextPage) {
-      onPaginationChange(pagination.page + 1, pagination.pageSize);
-    } else if (key.upArrow) {
-      // Increase page size
-      const newPageSize = Math.min(100, pagination.pageSize + 10);
-      onPaginationChange(pagination.page, newPageSize);
-    } else if (key.downArrow) {
-      // Decrease page size
-      const newPageSize = Math.max(5, pagination.pageSize - 10);
-      onPaginationChange(pagination.page, newPageSize);
-    } else if (hasKeyFlag(key, 'home')) {
-      // Go to first page
-      onPaginationChange(0, pagination.pageSize);
-    } else if (hasKeyFlag(key, 'end')) {
-      // Go to last page
-      onPaginationChange(pagination.totalPages - 1, pagination.pageSize);
-    }
-  });
 
   // Build footer sections
   const sections = useMemo(() => {
@@ -106,7 +75,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
         content: (
           <PaginationSection
             pagination={pagination}
-            focused={isFocused}
           />
         ),
         align: 'right',
@@ -123,7 +91,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
     showSelection,
     customContent,
     paginationEnabled,
-    isFocused,
     onPaginationChange,
   ]);
 
@@ -157,15 +124,6 @@ export const ListFooter: React.FC<ListFooterProps> = ({
           </Box>
         ))}
       </Box>
-
-      {/* Keyboard Help */}
-      {isFocused && paginationEnabled && (
-        <Box justifyContent="center">
-          <Text color="gray" dimColor>
-            ← → Navigate pages • ↑ ↓ Change page size • Home/End First/Last page
-          </Text>
-        </Box>
-      )}
     </Box>
   );
 };
@@ -222,35 +180,31 @@ const InfoSection: React.FC<{
  */
 const PaginationSection: React.FC<{
   pagination: ListPagination;
-  focused: boolean;
-}> = ({ pagination, focused }: {
-  pagination: ListPagination;
-  focused: boolean;
-}) => {
+}> = ({ pagination }) => {
   const { page, totalPages, pageSize, hasNextPage, hasPreviousPage } = pagination;
   const currentPage = page + 1; // Convert from 0-based to 1-based
 
   return (
     <Box flexDirection="row" alignItems="center">
       {/* Previous Page Button */}
-      <Text color={hasPreviousPage ? (focused ? 'blueBright' : 'blue') : 'gray'}>
+      <Text color={hasPreviousPage ? 'blue' : 'gray'}>
         {hasPreviousPage ? '◀' : '◁'}
       </Text>
 
       <Box marginLeft={1} marginRight={1}>
-        <Text color={focused ? 'blueBright' : 'gray'}>
+        <Text color="gray">
           Page {currentPage} of {totalPages}
         </Text>
       </Box>
 
       {/* Next Page Button */}
-      <Text color={hasNextPage ? (focused ? 'blueBright' : 'blue') : 'gray'}>
+      <Text color={hasNextPage ? 'blue' : 'gray'}>
         {hasNextPage ? '▶' : '▷'}
       </Text>
 
       {/* Page Size Info */}
       <Box marginLeft={2}>
-        <Text color={focused ? 'blue' : 'gray'}>
+        <Text color="gray">
           ({pageSize}/page)
         </Text>
       </Box>
@@ -274,11 +228,4 @@ function getJustifyContent(align?: string): 'flex-start' | 'center' | 'flex-end'
     default:
       return 'flex-start';
   }
-}
-
-/**
- * Safely read uncommon key flags (home/end) from Ink's key object
- */
-function hasKeyFlag(k: unknown, name: string): boolean {
-  return typeof k === 'object' && k !== null && Boolean((k as Record<string, boolean>)[name]);
 }
