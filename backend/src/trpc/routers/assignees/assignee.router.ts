@@ -144,12 +144,14 @@ const getAssigneesInput = z.object({
     .int("Limit must be a whole number")
     .min(PAGINATION_LIMITS.MIN_LIMIT, `Limit must be at least ${PAGINATION_LIMITS.MIN_LIMIT}`)
     .max(PAGINATION_LIMITS.MAX_LIMIT, `Limit cannot exceed ${PAGINATION_LIMITS.MAX_LIMIT}`)
-    .default(PAGINATION_LIMITS.DEFAULT_LIMIT),
+    .default(PAGINATION_LIMITS.DEFAULT_LIMIT)
+    .optional(),
 
   offset: z.number()
     .int("Offset must be a whole number")
     .min(PAGINATION_LIMITS.MIN_OFFSET, "Offset cannot be negative")
-    .default(PAGINATION_LIMITS.MIN_OFFSET),
+    .default(PAGINATION_LIMITS.MIN_OFFSET)
+    .optional(),
 });
 
 /* ========================================
