@@ -9,7 +9,8 @@
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 	"mounts": [
-		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
+		"source=${localEnv:HOME}/.augment,target=/home/node/.augment,type=bind",
 	],
 	"containerEnv": {
 		"TASKMAN_SERVER_URL": "http://localhost:8000"
