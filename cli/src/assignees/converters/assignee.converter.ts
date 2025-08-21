@@ -8,9 +8,9 @@ import { AbstractCliConverter } from "../../shared/converters/abstract.converter
 export interface SerializedAssignee {
   id: string;
   name: string;
-  email?: string | null;
-  phone?: string | null;
-  notes?: string | null;
+  email?: string | null | undefined;
+  phone?: string | null | undefined;
+  notes?: string | null | undefined;
   isActive: boolean;
   tenantId: string;
   creatorId: string | null;
@@ -60,9 +60,9 @@ export class AssigneeConverter extends AbstractCliConverter<Assignee, Serialized
     return {
       id: serializedAssignee.id,
       name: serializedAssignee.name,
-      email: serializedAssignee.email,
-      phone: serializedAssignee.phone,
-      notes: serializedAssignee.notes,
+      email: serializedAssignee.email ?? null,
+      phone: serializedAssignee.phone ?? null,
+      notes: serializedAssignee.notes ?? null,
       isActive: serializedAssignee.isActive,
       tenantId: serializedAssignee.tenantId,
       creatorId: serializedAssignee.creatorId,

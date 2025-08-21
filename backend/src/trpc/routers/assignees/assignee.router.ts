@@ -74,18 +74,18 @@ const createAssigneeInput = z.object({
 
   email: z.string()
     .email("Invalid email format")
-    .optional()
-    .transform(val => val || null),
+    .nullish()
+    .transform(val => val ? val : null),
 
   phone: z.string()
     .max(ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH, `Phone number must be ${ASSIGNEE_VALIDATION.PHONE_MAX_LENGTH} characters or less`)
-    .optional()
-    .transform(val => val || null),
+    .nullish()
+    .transform(val => val ? val : null),
 
   notes: z.string()
     .max(ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH, `Notes must be ${ASSIGNEE_VALIDATION.NOTES_MAX_LENGTH} characters or less`)
-    .optional()
-    .transform(val => val || null),
+    .nullish()
+    .transform(val => val ? val : null),
 
   isActive: z.boolean().default(true),
 });
