@@ -5,3 +5,4 @@ const trpcContext = initTRPC.context<Context>().create();
 
 export const router = trpcContext.router;
 export { trpcContext };
+export type { TaskmanRouter } from "./router.ts";
