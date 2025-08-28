@@ -1,6 +1,7 @@
 import { AuthSession } from "./auth-session.interface.ts";
 import type { AuthFlowStatusCallback } from "./auth-flow-status.interface.ts";
 import type { BackendTokenProvider } from "./backend-token-provider.interface.ts";
+import { User } from "@taskman/backend";
 
 /**
  * Authentication service interface for CLI applications
@@ -43,5 +44,13 @@ export interface AuthService extends BackendTokenProvider {
    * 
    * @returns Promise that resolves to the refreshed session or null if refresh fails
    */
-  refreshCurrentSession(): Promise<AuthSession | null>;
+  refreshCurrentSession(): Promise<AuthSession | null>
+
+   /**
+   * Get the currently authenticated user's information from the backend
+   *
+   * @returns Promise that resolves to the user information with Date objects properly converted
+   * @throws Error if not authenticated or if the request fails
+   */
+  getCurrentUserInfo(): Promise<User>;
 }

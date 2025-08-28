@@ -2,6 +2,7 @@ import type { User } from "../users/models/user.model.ts";
 import { AuthProviderFactory } from "../auth/factories/auth-provider.factory.ts";
 import { AuthService } from "../auth/services/auth.service.ts";
 import type { IncomingMessage } from "node:http";
+import { UsersService } from "../users/services/users.service.ts";
 
 /**
  * TRPC Context Interface
@@ -65,14 +66,14 @@ export async function createTRPCContext(req: IncomingMessage): Promise<Context> 
 async function _authenticateUser(token: string): Promise<User | null> {
   // For now, default to Google provider
   // TODO: Determine provider from token or other means
-  const provider = AuthProviderFactory.create("google");
-  const authService = new AuthService();
+  const provider = AuthProviderFactory.create("internal");
+  const userService = new UsersService();
   
   const payload = await provider.verifyToken(token);
   
   // Context should only find existing users, not create them
   // User creation happens during initial auth flow, not on every request
-  const user = await authService.findExistingUserFromToken(payload, provider.name);
+  const user = await userService.getUserById(payload.sub);
 
   return user;
 }
