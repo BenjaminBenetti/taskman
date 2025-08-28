@@ -20,10 +20,10 @@ effectively.
 You must follow these steps when implementing a change:
 
 1. **Identify the Change**: Understand the change that needs to be made.
-2. **Assign Research Subagent**: If the change involoves using libraries or
+2. **Assign Research Subagent**: If the change involves changing code, libraries or
    frameworks, assign the `library-research-specialist` subagent to gather
-   information. And provide insight in to the best practices around these
-   libraries.
+   information about the code, libraries and frameworks involved. Making sure to target
+   up to date documentation and best practices in the case of 3rd party libraries.
 3. **Architect The Solution**: If the change involves editing code,
    you will architect the solution using the `feature-architect` subagent. 
    passing any relevant information from the `library-research-specialist`
